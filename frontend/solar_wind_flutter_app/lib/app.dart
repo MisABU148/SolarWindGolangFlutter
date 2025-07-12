@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'features/auth/presentation/screens/welcome_screen.dart';
 import 'features/auth/presentation/screens/city_screen.dart';
 import 'features/auth/presentation/screens/sport_screen.dart';
+import 'features/auth/presentation/screens/about_me.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -31,6 +32,18 @@ class MyApp extends StatelessWidget {
                           onDone: (selectedSports) {
                             print('City: ${city.name}');
                             print('Selected sports: ${selectedSports.map((s) => s.name).join(", ")}');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FillProfileScreen(
+                                  onDone: (name, about) {
+                                    print('Имя: $name');
+                                    print('О себе: $about');
+                                    // здесь можно идти дальше — например, на экран загрузки фото или завершения профиля
+                                  },
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),
