@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  final VoidCallback onNext;
+  final void Function(BuildContext context) onNext;
 
   const WelcomeScreen({super.key, required this.onNext});
 
@@ -13,7 +13,7 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        height: double.infinity, // важно
+        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [mainPinkColor, mainYellowColor],
@@ -75,7 +75,7 @@ class WelcomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: onNext,
+                    onPressed: () => onNext(context),
                     child: const Text('Find your gym bro'),
                   ),
                 ),

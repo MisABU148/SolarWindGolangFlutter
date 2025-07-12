@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'features/auth/presentation/screens/welcome_screen.dart';
+import 'features/auth/presentation/screens/city_screen.dart';
+import 'features/auth/presentation/screens/sport_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,11 +15,32 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: WelcomeScreen(
-        onNext: () {
-          // TODO: Навигация на следующий экран
-          // например: Navigator.push(...)
-        },
+      home: Builder(
+        builder: (context) => WelcomeScreen(
+          onNext: (ctx) {
+            Navigator.push(
+              ctx,
+              MaterialPageRoute(
+                builder: (_) => ChooseCityScreen(
+                  onCitySelected: (city) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ChooseSportScreen(
+                          selectedCity: city,
+                          onDone: (selectedSports) {
+                            print('City: ${city.name}');
+                            print('Selected sports: ${selectedSports.map((s) => s.name).join(", ")}');
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
