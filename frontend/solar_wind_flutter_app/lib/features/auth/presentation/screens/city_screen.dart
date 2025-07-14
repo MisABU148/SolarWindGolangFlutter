@@ -16,12 +16,18 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
   final controller = TextEditingController();
   List<City> cities = [];
   bool isLoading = false;
+  City? _selectedCity;
 
   void _search(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() {
+        cities = [];
+      });
+      return;
+    }
     setState(() => isLoading = true);
     try {
       final results = await cityService.searchCities(query);
-      print(query);
       setState(() => cities = results);
     } catch (e) {
       print(e);
@@ -61,11 +67,28 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
                 itemCount: cities.length,
                 itemBuilder: (context, index) {
                   final city = cities[index];
+                  final isSelected = _selectedCity?.id == city.id;
                   return ListTile(
                     title: Text(city.name),
-                    onTap: () => widget.onCitySelected(city),
+                    selected: isSelected,
+                    onTap: () {
+                      setState(() {
+                        _selectedCity = city;
+                      });
+                      widget.onCitySelected(city);
+                    },
                   );
                 },
+              ),
+            ),
+          if (_selectedCity != null)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context, _selectedCity);
+                },
+                child: const Text('Далее'),
               ),
             ),
         ],
@@ -73,3 +96,4 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
     );
   }
 }
+

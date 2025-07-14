@@ -7,6 +7,8 @@ import 'features/auth/data/services/registration_service.dart';
 import 'features/auth/presentation/state/registration_provider.dart';
 import 'package:provider/provider.dart';
 import 'features/auth/presentation/screens/gender_and_birth_screen.dart';
+import 'package:solar_wind_flutter_app/features/feed/presentation/screen/user_feed_screen.dart';
+
 
 
 class MyApp extends StatelessWidget {
@@ -59,15 +61,16 @@ class MyApp extends StatelessWidget {
                                             try {
                                               final service = RegistrationService();
                                               await service.register(provider.data);
-
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(content: Text('Registration successful!')),
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(builder: (_) => const UserFeedScreen()),
                                               );
                                             } catch (e) {
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(content: Text('Registration failed: $e')),
                                               );
                                             }
+
                                           },
                                         ),
                                       ),

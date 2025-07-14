@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:solar_wind_flutter_app/features/feed/data/models/user.dart';
 import 'package:solar_wind_flutter_app/features/feed/data/services/feed_service.dart';
+import 'profile_screen.dart';
+import 'my_profile_screen.dart';
 
 class UserFeedScreen extends StatefulWidget {
   const UserFeedScreen({super.key});
@@ -41,7 +43,6 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
     return Scaffold(
       body: Column(
         children: [
-          // 🔝 Хедер с кнопкой
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
             width: double.infinity,
@@ -54,27 +55,30 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
             ),
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.person, color: Colors.white),
-                  onPressed: () {
-                    // TODO: Перейти в профиль
-                    print("Go to my profile");
-                  },
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Users Feed',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: IconButton(
+                      iconSize: 32,
+                      icon: const Icon(Icons.person, color: Colors.white),
+                      onPressed: () {
+                        final userId = 637451540;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MyProfileScreen(userId: userId),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 8),
-          // 🔽 Лента
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -84,34 +88,37 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
                       final user = _users[index];
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user.username,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => UserProfileScreen(userId: user.id),
+                              ),
+                            );
+                          },
+                          child: Card(
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(user.username, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 8),
+                                  Text(user.description),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 8,
+                                    children: user.sportName.map((sport) => Chip(label: Text(sport))).toList(),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(user.description),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  children: user.sportName
-                                      .map((sport) => Chip(label: Text(sport)))
-                                      .toList(),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
+
                       );
                     },
                   ),
