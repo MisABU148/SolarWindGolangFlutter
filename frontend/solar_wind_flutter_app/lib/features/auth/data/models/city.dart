@@ -4,8 +4,14 @@ class City {
 
   City({required this.id, required this.name});
 
-  factory City.fromJson(Map<String, dynamic> json) => City(
-        id: json['id'],
-        name: json['cityName'],
-      );
+  factory City.fromJson(Map<String, dynamic> json) {
+    if (json['id'] == null || json['name'] == null) {
+      throw FormatException('Invalid city data: $json');
+    }
+
+    return City(
+      id: json['id'],
+      name: json['name'],
+    );
+  }
 }
