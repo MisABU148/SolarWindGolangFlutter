@@ -1,11 +1,11 @@
 class Sport {
-  final String id;
+  final int id;
   final String name;
 
   Sport({required this.id, required this.name});
 
   factory Sport.fromJson(Map<String, dynamic> json) => Sport(
-        id: json['id'].toString(),
+        id: json['id'],
         name: json['sportType'] ?? '',
       );
 
