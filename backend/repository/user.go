@@ -22,8 +22,8 @@ func (r *UserRepository) CreateUser(user model.User) (int64, error) {
 	}
 
 	stmt, err := r.DB.Prepare(`
-		INSERT INTO users(username, alias, description, age, gender, city_id, preferred_gym_time, sport_id)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO users(username, password_hash, alias, description, age, preferredgender, gender, city_id, preferred_gym_time, sport_id)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
 		return 0, err
@@ -32,9 +32,11 @@ func (r *UserRepository) CreateUser(user model.User) (int64, error) {
 
 	result, err := stmt.Exec(
 		user.UserName,
+		user.PasswordHash,
 		user.Alias,
 		user.Description,
 		user.Age,
+		user.PreferredGender,
 		user.Gender,
 		user.CityId,
 		string(preferredTimeJSON),
@@ -48,11 +50,27 @@ func (r *UserRepository) CreateUser(user model.User) (int64, error) {
 }
 
 func (r *UserRepository) GetUserByID(id int64) (*model.User, error) {
-	row := r.DB.QueryRow("SELECT id, username, alias, description, age, gender, city_id, preferred_gym_time, sport_id FROM users WHERE id = ?", id)
+	row := r.DB.QueryRow(`
+		SELECT id, username, password_hash, alias, description, age, preferredgender, gender, city_id, preferred_gym_time, sport_id
+		FROM users
+		WHERE id = ?
+	`)
 	var user model.User
 	var gymTimeJSON, sportsJSON string
 
-	err := row.Scan(&user.ID, &user.UserName, &user.Alias, &user.Description, &user.Age, &user.Gender, &user.CityId, &gymTimeJSON, &sportsJSON)
+	err := row.Scan(
+		&user.ID,
+		&user.UserName,
+		&user.PasswordHash,
+		&user.Alias,
+		&user.Description,
+		&user.Age,
+		&user.PreferredGender,
+		&user.Gender,
+		&user.CityId,
+		&gymTimeJSON,
+		&sportsJSON,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -73,15 +91,31 @@ func (r *UserRepository) UpdateUser(user model.User) error {
 	sportsJSON, _ := json.Marshal(user.SportId)
 
 	_, err := r.DB.Exec(`
-		UPDATE users SET username = ?, alias = ?, description = ?, age = ?, gender = ?, city_id = ?, preferred_gym_time = ?, sport_id = ?
+		UPDATE users SET
+			username = ?, password_hash = ?, alias = ?, description = ?, age = ?,
+			preferredgender = ?, gender = ?, city_id = ?, preferred_gym_time = ?, sport_id = ?
 		WHERE id = ?
 	`,
-		user.UserName, user.Alias, user.Description, user.Age, user.Gender, user.CityId, string(gymTimeJSON), string(sportsJSON), user.ID)
+		user.UserName,
+		user.PasswordHash,
+		user.Alias,
+		user.Description,
+		user.Age,
+		user.PreferredGender,
+		user.Gender,
+		user.CityId,
+		string(gymTimeJSON),
+		string(sportsJSON),
+		user.ID,
+	)
 	return err
 }
 
 func (r *UserRepository) GetAllUsers() ([]model.User, error) {
-	rows, err := r.DB.Query("SELECT id, username, alias, description, age, gender, city_id, preferred_gym_time, sport_id FROM users")
+	rows, err := r.DB.Query(`
+		SELECT id, username, password_hash, alias, description, age, preferredgender, gender, city_id, preferred_gym_time, sport_id
+		FROM users
+	`)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +125,19 @@ func (r *UserRepository) GetAllUsers() ([]model.User, error) {
 	for rows.Next() {
 		var user model.User
 		var gymTimeJSON, sportsJSON string
-		err := rows.Scan(&user.ID, &user.UserName, &user.Alias, &user.Description, &user.Age, &user.Gender, &user.CityId, &gymTimeJSON, &sportsJSON)
+		err := rows.Scan(
+			&user.ID,
+			&user.UserName,
+			&user.PasswordHash,
+			&user.Alias,
+			&user.Description,
+			&user.Age,
+			&user.PreferredGender,
+			&user.Gender,
+			&user.CityId,
+			&gymTimeJSON,
+			&sportsJSON,
+		)
 		if err != nil {
 			continue
 		}
