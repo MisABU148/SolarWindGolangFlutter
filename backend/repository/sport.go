@@ -29,7 +29,7 @@ func (r *SportRepository) GetAllSports() ([]model.Sport, error) {
 
 func (r *SportRepository) GetSportsPaginated(page, size int) ([]model.Sport, error) {
 	offset := (page - 1) * size
-	rows, err := r.DB.Query("SELECT id, name FROM sports LIMIT ? OFFSET ?", size, offset)
+	rows, err := r.DB.Query("SELECT id, name FROM sports LIMIT $1 OFFSET $2", size, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (r *SportRepository) GetSportsPaginated(page, size int) ([]model.Sport, err
 }
 
 func (r *SportRepository) SearchSports(word string) ([]model.Sport, error) {
-	rows, err := r.DB.Query("SELECT id, name FROM sports WHERE name LIKE ?", "%"+word+"%")
+	rows, err := r.DB.Query("SELECT id, name FROM sports WHERE name LIKE $1", "%"+word+"%")
 	if err != nil {
 		return nil, err
 	}
