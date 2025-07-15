@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:solar_wind_flutter_app/features/auth/presentation/screens/city_screen.dart';
+import 'package:solar_wind_flutter_app/features/auth/presentation/state/registration_provider.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  final void Function(BuildContext context) onNext;
-
-  const WelcomeScreen({super.key, required this.onNext});
+  const WelcomeScreen({super.key});
 
   static const mainPinkColor = Color.fromRGBO(243, 75, 213, 1); // #F34BD5
   static const mainYellowColor = Color.fromRGBO(251, 218, 85, 1); // #FBDA55
+
+  void _goToCitySelection(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChooseCityScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +85,7 @@ class WelcomeScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () => onNext(context),
+                    onPressed: () => _goToCitySelection(context),
                     child: const Text('Find your gym bro'),
                   ),
                 ),

@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../data/services/sport_service.dart';
+import 'package:provider/provider.dart';
 import '../../data/models/sport.dart';
 import '../../data/models/city.dart';
+import '../../data/services/sport_service.dart';
+import '../../presentation/state/registration_provider.dart';
+import '../screens/about_me.dart';
 
 class ChooseSportScreen extends StatefulWidget {
   final City selectedCity;
-  final void Function(List<Sport>) onDone;
 
-  const ChooseSportScreen({
-    super.key,
-    required this.selectedCity,
-    required this.onDone,
-  });
+  const ChooseSportScreen({super.key, required this.selectedCity});
 
   @override
   State<ChooseSportScreen> createState() => _ChooseSportScreenState();
@@ -36,7 +34,7 @@ class _ChooseSportScreenState extends State<ChooseSportScreen> {
       final results = await sportService.searchSports(query);
       setState(() => allSports = results);
     } catch (e) {
-      print('Error: $e');
+      print('Sport search error: $e');
     } finally {
       setState(() => isLoading = false);
     }
@@ -50,6 +48,16 @@ class _ChooseSportScreenState extends State<ChooseSportScreen> {
         selectedSports.add(sport);
       }
     });
+  }
+
+  void _goNext() {
+    final provider = Provider.of<RegistrationProvider>(context, listen: false);
+    provider.setSports(selectedSports);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const FillProfileScreen()),
+    );
   }
 
   @override
@@ -94,7 +102,6 @@ class _ChooseSportScreenState extends State<ChooseSportScreen> {
                 itemBuilder: (context, index) {
                   final sport = allSports[index];
                   final isSelected = selectedSports.contains(sport);
-
                   return CheckboxListTile(
                     title: Text(sport.name),
                     value: isSelected,
@@ -109,13 +116,11 @@ class _ChooseSportScreenState extends State<ChooseSportScreen> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: selectedSports.isNotEmpty
-                    ? () => widget.onDone(selectedSports)
-                    : null,
+                onPressed: selectedSports.isNotEmpty ? _goNext : null,
                 child: const Text('Next'),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

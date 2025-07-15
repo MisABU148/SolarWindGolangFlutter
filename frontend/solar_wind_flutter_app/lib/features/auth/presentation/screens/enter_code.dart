@@ -4,9 +4,7 @@ import '../../data/services/auth_service.dart';
 import 'city_screen.dart';
 
 class EnterCodeScreen extends StatefulWidget {
-  final void Function(BuildContext context)? onSuccess;
-
-  const EnterCodeScreen({super.key, this.onSuccess});
+  const EnterCodeScreen({super.key});
 
   @override
   State<EnterCodeScreen> createState() => _EnterCodeScreenState();
@@ -29,15 +27,13 @@ class _EnterCodeScreenState extends State<EnterCodeScreen> {
       await prefs.setString('telegram_id', auth.id);
       await prefs.setString('token', auth.token);
 
-      if (widget.onSuccess != null) {
-        widget.onSuccess!(context);
-      } else {
-        // Если колбэк не передан, то просто переходим на выбор города
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => ChooseCityScreen(onCitySelected: (_) {})),
-        );
-      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChooseCityScreen(
+          ),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Authorization failed: $e')),
@@ -45,12 +41,6 @@ class _EnterCodeScreenState extends State<EnterCodeScreen> {
     } finally {
       setState(() => _loading = false);
     }
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 
   @override
