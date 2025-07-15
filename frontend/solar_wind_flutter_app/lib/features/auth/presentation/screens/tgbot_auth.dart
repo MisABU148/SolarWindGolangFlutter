@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
-import 'enter_code.dart';
+import 'package:solar_wind_flutter_app/features/auth/presentation/screens/enter_code.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TelegramAuthScreen extends StatelessWidget {
-  final void Function(BuildContext context) onNext;
-
-  const TelegramAuthScreen({super.key, required this.onNext});
+  const TelegramAuthScreen({super.key});
 
   void _openTelegramBot(BuildContext context) async {
     const botUrl = 'https://t.me/SolarWindAuthorization_bot';
     if (await canLaunchUrl(Uri.parse(botUrl))) {
       await launchUrl(Uri.parse(botUrl));
-      onNext(context);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EnterCodeScreen(),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Could not open Telegram.")),

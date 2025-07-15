@@ -6,6 +6,9 @@ import 'package:solar_wind_flutter_app/features/auth/data/models/city.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/models/sport.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/services/city_service.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/services/sport_service.dart';
+import 'package:solar_wind_flutter_app/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:solar_wind_flutter_app/features/auth/presentation/screens/tgbot_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyProfileScreen extends StatefulWidget {
   final int userId;
@@ -52,6 +55,21 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     _sportSearchController.dispose();
     super.dispose();
   }
+
+  Future<void> _logout() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+
+  if (!mounted) return;
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(
+      builder: (_) => WelcomeScreen(),
+    ),
+    (route) => false,
+  );
+}
+
 
   Future<void> _loadInitialData() async {
     try {
@@ -250,50 +268,57 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("My Profile")),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  children: [
-                    const Text(
-                      "Edit your profile",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      initialValue: _data.username,
-                      decoration: const InputDecoration(labelText: 'Username'),
-                      onChanged: (value) => _data.username = value,
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Enter username' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      initialValue: _data.description,
-                      decoration: const InputDecoration(labelText: 'Description'),
-                      maxLines: 3,
-                      onChanged: (value) => _data.description = value,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildCitySearchField(),
-                    const SizedBox(height: 12),
-                    _buildSportSearchField(),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _saveProfile,
-                      child: const Text("Save Changes"),
-                    ),
-                  ],
-                ),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: const Text("My Profile")),
+    body: _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: [
+                  const Text(
+                    "Edit your profile",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    initialValue: _data.username,
+                    decoration: const InputDecoration(labelText: 'Username'),
+                    onChanged: (value) => _data.username = value,
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Enter username' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    initialValue: _data.description,
+                    decoration: const InputDecoration(labelText: 'Description'),
+                    maxLines: 3,
+                    onChanged: (value) => _data.description = value,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildCitySearchField(),
+                  const SizedBox(height: 12),
+                  _buildSportSearchField(),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: _saveProfile,
+                    child: const Text("Save Changes"),
+                  ),
+                  const SizedBox(height: 24),
+                  TextButton(
+                    onPressed: _logout,
+                    style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    child: const Text("Log out"),
+                  ),
+                ],
               ),
             ),
-    );
-  }
+          ),
+  );
+}
+
 }

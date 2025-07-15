@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../data/services/city_service.dart';
 import '../../data/models/city.dart';
+import '../screens/sport_screen.dart';
+import '../../presentation/state/registration_provider.dart';
 
 class ChooseCityScreen extends StatefulWidget {
-  final void Function(City) onCitySelected;
-
-  const ChooseCityScreen({super.key, required this.onCitySelected});
+  const ChooseCityScreen({super.key});
 
   @override
   State<ChooseCityScreen> createState() => _ChooseCityScreenState();
@@ -20,19 +21,32 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
 
   void _search(String query) async {
     if (query.trim().isEmpty) {
-      setState(() {
-        cities = [];
-      });
+      setState(() => cities = []);
       return;
     }
+
     setState(() => isLoading = true);
     try {
       final results = await cityService.searchCities(query);
       setState(() => cities = results);
     } catch (e) {
-      print(e);
+      print('City search error: $e');
     } finally {
       setState(() => isLoading = false);
+    }
+  }
+
+  void _goNext() {
+    if (_selectedCity != null) {
+      final provider = Provider.of<RegistrationProvider>(context, listen: false);
+      provider.setCity(_selectedCity!);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChooseSportScreen(selectedCity: _selectedCity!),
+        ),
+      );
     }
   }
 
@@ -72,10 +86,7 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
                     title: Text(city.name),
                     selected: isSelected,
                     onTap: () {
-                      setState(() {
-                        _selectedCity = city;
-                      });
-                      widget.onCitySelected(city);
+                      setState(() => _selectedCity = city);
                     },
                   );
                 },
@@ -85,9 +96,7 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context, _selectedCity);
-                },
+                onPressed: _goNext,
                 child: const Text('Далее'),
               ),
             ),
@@ -96,4 +105,3 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
     );
   }
 }
-

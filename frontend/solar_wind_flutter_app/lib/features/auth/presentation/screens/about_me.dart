@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../presentation/state/registration_provider.dart';
+import 'gender_and_birth_screen.dart';
 
 class FillProfileScreen extends StatefulWidget {
-  final void Function(String name, String about) onDone;
-
-  const FillProfileScreen({super.key, required this.onDone});
+  const FillProfileScreen({super.key});
 
   @override
   State<FillProfileScreen> createState() => _FillProfileScreenState();
@@ -15,7 +17,7 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
 
   bool get isNameValid => nameController.text.trim().isNotEmpty;
 
-  void _onChanged() => setState(() {}); // обновляет состояние для кнопки
+  void _onChanged() => setState(() {});
 
   @override
   void initState() {
@@ -29,6 +31,22 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
     nameController.dispose();
     aboutController.dispose();
     super.dispose();
+  }
+
+  void _goNext() {
+    final name = nameController.text.trim();
+    final about = aboutController.text.trim();
+
+    final provider = Provider.of<RegistrationProvider>(context, listen: false);
+    provider.setName(name);
+    provider.setAbout(about);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const GenderAndBirthScreen(),
+      ),
+    );
   }
 
   @override
@@ -63,12 +81,7 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: isNameValid
-                    ? () => widget.onDone(
-                          nameController.text.trim(),
-                          aboutController.text.trim(),
-                        )
-                    : null,
+                onPressed: isNameValid ? _goNext : null,
                 child: const Text('Next'),
               ),
             )

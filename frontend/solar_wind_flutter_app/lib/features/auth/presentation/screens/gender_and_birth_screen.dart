@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../presentation/state/registration_provider.dart';
+import '../../data/services/registration_service.dart';
+import '../../../feed/presentation/screen/user_feed_screen.dart';
 
 class GenderAndBirthScreen extends StatefulWidget {
-  final void Function(String gender, String preferredGender, DateTime birthDate) onNext;
-
-  const GenderAndBirthScreen({super.key, required this.onNext});
+  const GenderAndBirthScreen({super.key});
 
   @override
   State<GenderAndBirthScreen> createState() => _GenderAndBirthScreenState();
@@ -13,6 +17,7 @@ class _GenderAndBirthScreenState extends State<GenderAndBirthScreen> {
   String? gender;
   String? preferredGender;
   DateTime? birthDate;
+  bool isLoading = false;
 
   void _selectDate() async {
     final now = DateTime.now();
@@ -30,6 +35,39 @@ class _GenderAndBirthScreenState extends State<GenderAndBirthScreen> {
 
   bool get isValid =>
       gender != null && preferredGender != null && birthDate != null;
+
+  void _submit() async {
+    if (!isValid) return;
+
+    final provider = Provider.of<RegistrationProvider>(context, listen: false);
+    provider.setGender(gender!);
+    provider.setPreferredGender(preferredGender!);
+    provider.setBirthDate(birthDate!);
+
+    setState(() => isLoading = true);
+
+    try {
+      final service = RegistrationService();
+      await service.register(provider.data);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isRegistered', true);
+
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const UserFeedScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration failed: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,10 +131,10 @@ class _GenderAndBirthScreenState extends State<GenderAndBirthScreen> {
             ),
             const Spacer(),
             ElevatedButton(
-              onPressed: isValid
-                  ? () => widget.onNext(gender!, preferredGender!, birthDate!)
-                  : null,
-              child: const Text('Next'),
+              onPressed: isValid && !isLoading ? _submit : null,
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text('Complete Registration'),
             ),
           ],
         ),
