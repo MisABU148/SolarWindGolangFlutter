@@ -3,6 +3,7 @@ import 'package:solar_wind_flutter_app/features/feed/data/models/user.dart';
 import 'package:solar_wind_flutter_app/features/feed/data/services/feed_service.dart';
 import 'profile_screen.dart';
 import 'my_profile_screen.dart';
+import 'notifications_screen.dart';
 
 class UserFeedScreen extends StatefulWidget {
   const UserFeedScreen({super.key});
@@ -54,25 +55,40 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
               ),
             ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: IconButton(
-                      iconSize: 32,
-                      icon: const Icon(Icons.person, color: Colors.white),
-                      onPressed: () {
-                        final userId = 637451540;
+                // Левая кнопка "Мой профиль"
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: IconButton(
+                    iconSize: 32,
+                    icon: const Icon(Icons.person, color: Colors.white),
+                    onPressed: () {
+                      final userId = 637451540;
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => MyProfileScreen(userId: userId),
-                          ),
-                        );
-                      },
-                    ),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MyProfileScreen(userId: userId),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: IconButton(
+                    iconSize: 32,
+                    icon: const Icon(Icons.notifications, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationsScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -118,7 +134,6 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
                             ),
                           ),
                         ),
-
                       );
                     },
                   ),
