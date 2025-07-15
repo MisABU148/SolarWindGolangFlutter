@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:solar_wind_flutter_app/features/auth/presentation/screens/city_screen.dart';
+import 'package:solar_wind_flutter_app/features/auth/presentation/screens/tgbot_auth.dart';
 import 'package:solar_wind_flutter_app/features/auth/presentation/state/registration_provider.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -13,7 +13,7 @@ class WelcomeScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ChooseCityScreen(),
+        builder: (_) => TelegramAuthScreen(),
       ),
     );
   }

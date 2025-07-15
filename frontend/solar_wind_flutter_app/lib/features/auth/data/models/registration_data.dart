@@ -1,6 +1,4 @@
-// lib/features/auth/data/models/registration_data.dart
-import '../models/city.dart';
-import '../models/sport.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegistrationData {
   String? username;
@@ -26,4 +24,14 @@ class RegistrationData {
     "preferredGymTime": days,
     "sportId": sportId
   };
+
+  Future<Map<String, dynamic>> toJsonWithPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final telegramId = prefs.getString('telegram_id');
+
+    final base = toJson();
+    base["telegramId"] = telegramId;
+    base["id"] = telegramId;
+    return base;
+  }
 }

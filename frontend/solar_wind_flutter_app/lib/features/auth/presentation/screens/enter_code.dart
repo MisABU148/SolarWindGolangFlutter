@@ -24,7 +24,7 @@ class _EnterCodeScreenState extends State<EnterCodeScreen> {
       final auth = await _authService.sendCode(code);
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('telegram_id', auth.id);
+      await prefs.setString('telegram_id', auth.id.toString());
       await prefs.setString('token', auth.token);
 
       Navigator.pushReplacement(

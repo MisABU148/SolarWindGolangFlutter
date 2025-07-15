@@ -57,7 +57,6 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Левая кнопка "Мой профиль"
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: IconButton(
