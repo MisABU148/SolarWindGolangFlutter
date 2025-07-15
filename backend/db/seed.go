@@ -41,7 +41,11 @@ func insertCities(db *sql.DB, path string) error {
 	}
 
 	for i, name := range cityNames {
-		_, err := db.Exec("INSERT OR IGNORE INTO cities(id, name) VALUES (?, ?)", i+1, name)
+		_, err := db.Exec(`
+			INSERT INTO cities(id, name) 
+			VALUES ($1, $2)
+			ON CONFLICT (id) DO NOTHING`,
+			i+1, name)
 		if err != nil {
 			log.Println("Failed to insert city:", name, err)
 		}
@@ -61,7 +65,11 @@ func insertSports(db *sql.DB, path string) error {
 	}
 
 	for i, name := range sportNames {
-		_, err := db.Exec("INSERT OR IGNORE INTO sports(id, name) VALUES (?, ?)", i+1, name)
+		_, err := db.Exec(`
+			INSERT INTO sports(id, name) 
+			VALUES ($1, $2)
+			ON CONFLICT (id) DO NOTHING`,
+			i+1, name)
 		if err != nil {
 			log.Println("Failed to insert sport:", name, err)
 		}

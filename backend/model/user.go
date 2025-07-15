@@ -15,6 +15,7 @@ type UserDTO struct {
 
 type User struct {
 	ID               int64
+	TelegramID       int64
 	UserName         string
 	PasswordHash     string
 	Alias            string

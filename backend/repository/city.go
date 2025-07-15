@@ -29,7 +29,7 @@ func (r *CityRepository) GetAllCities() ([]model.City, error) {
 
 func (r *CityRepository) GetCitiesPaginated(page, size int) ([]model.City, error) {
 	offset := (page - 1) * size
-	rows, err := r.DB.Query("SELECT id, name FROM cities LIMIT ? OFFSET ?", size, offset)
+	rows, err := r.DB.Query("SELECT id, name FROM cities LIMIT $1 OFFSET $2", size, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (r *CityRepository) GetCitiesPaginated(page, size int) ([]model.City, error
 }
 
 func (r *CityRepository) SearchCities(word string) ([]model.City, error) {
-	rows, err := r.DB.Query("SELECT id, name FROM cities WHERE name LIKE ?", "%"+word+"%")
+	rows, err := r.DB.Query("SELECT id, name FROM cities WHERE name LIKE $1", "%"+word+"%")
 	if err != nil {
 		return nil, err
 	}

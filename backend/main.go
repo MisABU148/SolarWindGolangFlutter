@@ -3,17 +3,31 @@ package main
 import (
 	"backend/controller"
 	"backend/db"
+	"backend/middleware"
 	"backend/repository"
 	"backend/service"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	dbConn, err := sql.Open("sqlite", "./users.db")
+	// connStr := fmt.Sprintf("host=localhost port=5434 user=postgres password=postgres dbname=userdb sslmode=disable")
+
+	connStr := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+	)
+
+	dbConn, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +53,20 @@ func main() {
 	sportService := &service.SportService{Repo: sportRepo}
 	sportController := &controller.SportController{Service: sportService}
 
-	http.HandleFunc("/api/me", func(w http.ResponseWriter, r *http.Request) {
+	authController := &controller.AuthController{UserRepo: userRepo}
+
+	http.HandleFunc("/api/auth/custom-auth", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			authController.GetTokenByCode(w, r)
+		case http.MethodPost:
+			authController.PostCode(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	http.HandleFunc("/api/me", middleware.JWTAuthMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			userController.GetUserHandler(w, r)
@@ -52,7 +79,7 @@ func main() {
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
-	})
+	}))
 
 	http.HandleFunc("/api/getUsers", userController.GetAllUsersHandler)
 
