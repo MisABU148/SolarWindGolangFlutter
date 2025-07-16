@@ -90,7 +90,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     }
 
     return Scaffold(
-      AppBar(
+      appBar: AppBar(
   backgroundColor: Theme.of(context).colorScheme.primary, // Основной цвет темы
   foregroundColor: Theme.of(context).colorScheme.onPrimary, // Цвет текста/иконок
   title: Text(_user!.username),
