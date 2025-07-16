@@ -6,9 +6,6 @@ import 'package:solar_wind_flutter_app/features/auth/data/models/city.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/models/sport.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/services/city_service.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/services/sport_service.dart';
-import 'package:solar_wind_flutter_app/features/auth/presentation/screens/welcome_screen.dart';
-import 'package:solar_wind_flutter_app/features/auth/presentation/screens/tgbot_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MyProfileScreen extends StatefulWidget {
   final int userId;
@@ -55,21 +52,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     _sportSearchController.dispose();
     super.dispose();
   }
-
-  Future<void> _logout() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.clear();
-
-  if (!mounted) return;
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(
-      builder: (_) => WelcomeScreen(),
-    ),
-    (route) => false,
-  );
-}
-
 
   Future<void> _loadInitialData() async {
     try {
@@ -173,30 +155,33 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     }
   }
 
-  Widget _buildCitySearchField() {
+  Widget _buildCitySearchField(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("City", style: TextStyle(fontWeight: FontWeight.bold)),
+        Text("City", style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         TextFormField(
           controller: _citySearchController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: "Search city",
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
+            fillColor: theme.colorScheme.surface,
+            filled: true,
           ),
           validator: (value) {
             if (_selectedCity == null) return 'Select a city';
             return null;
           },
+          style: theme.textTheme.bodyMedium,
         ),
         if (_citySearchResults.isNotEmpty)
           Container(
             constraints: const BoxConstraints(maxHeight: 150),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: theme.colorScheme.outline),
               borderRadius: BorderRadius.circular(4),
-              color: Colors.white,
+              color: theme.colorScheme.surface,
             ),
             child: ListView.builder(
               shrinkWrap: true,
@@ -204,7 +189,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               itemBuilder: (context, index) {
                 final city = _citySearchResults[index];
                 return ListTile(
-                  title: Text(city.name),
+                  title: Text(city.name, style: theme.textTheme.bodyMedium),
                   onTap: () => _selectCity(city),
                 );
               },
@@ -214,43 +199,46 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
-  Widget _buildSportSearchField() {
+  Widget _buildSportSearchField(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Sports", style: TextStyle(fontWeight: FontWeight.bold)),
+        Text("Sports", style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-
-        // Выбранные теги
         Wrap(
           spacing: 8,
           runSpacing: 4,
           children: _selectedSports
               .map(
                 (sport) => Chip(
-                  label: Text(sport.name),
+                  label: Text(
+                    sport.name,
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
+                  ),
+                  backgroundColor: theme.colorScheme.secondaryContainer,
                   onDeleted: () => _removeSport(sport),
                 ),
               )
               .toList(),
         ),
         const SizedBox(height: 8),
-
         TextField(
           controller: _sportSearchController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: "Search sports",
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
+            fillColor: theme.colorScheme.surface,
+            filled: true,
           ),
+          style: theme.textTheme.bodyMedium,
         ),
-
         if (_sportSearchResults.isNotEmpty)
           Container(
             constraints: const BoxConstraints(maxHeight: 150),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: theme.colorScheme.outline),
               borderRadius: BorderRadius.circular(4),
-              color: Colors.white,
+              color: theme.colorScheme.surface,
             ),
             child: ListView.builder(
               shrinkWrap: true,
@@ -258,7 +246,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               itemBuilder: (context, index) {
                 final sport = _sportSearchResults[index];
                 return ListTile(
-                  title: Text(sport.name),
+                  title: Text(sport.name, style: theme.textTheme.bodyMedium),
                   onTap: () => _addSport(sport),
                 );
               },
@@ -268,57 +256,71 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
-@override
+  @override
 Widget build(BuildContext context) {
+  final theme = Theme.of(context);
+
   return Scaffold(
-    appBar: AppBar(title: const Text("My Profile")),
+    appBar: AppBar(
+      title: const Text("My Profile"),
+      backgroundColor: theme.colorScheme.primaryContainer,
+      foregroundColor: theme.colorScheme.onPrimaryContainer,
+      elevation: 0,
+    ),
     body: _isLoading
-        ? const Center(child: CircularProgressIndicator())
+        ? Center(
+            child: CircularProgressIndicator(color: theme.colorScheme.primary),
+          )
         : Padding(
             padding: const EdgeInsets.all(16),
             child: Form(
               key: _formKey,
               child: ListView(
                 children: [
-                  const Text(
+                  Text(
                     "Edit your profile",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    initialValue: _data.username,
-                    decoration: const InputDecoration(labelText: 'Username'),
-                    onChanged: (value) => _data.username = value,
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Enter username' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    initialValue: _data.description,
-                    decoration: const InputDecoration(labelText: 'Description'),
-                    maxLines: 3,
-                    onChanged: (value) => _data.description = value,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildCitySearchField(),
-                  const SizedBox(height: 12),
-                  _buildSportSearchField(),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _saveProfile,
-                    child: const Text("Save Changes"),
-                  ),
-                  const SizedBox(height: 24),
-                  TextButton(
-                    onPressed: _logout,
-                    style: TextButton.styleFrom(foregroundColor: Colors.red),
-                    child: const Text("Log out"),
-                  ),
-                ],
+                    TextFormField(
+                      initialValue: _data.username,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        border: const OutlineInputBorder(),
+                        fillColor: theme.colorScheme.surface,
+                        filled: true,
+                      ),
+                      style: theme.textTheme.bodyMedium,
+                      onChanged: (value) => _data.username = value,
+                      validator: (value) =>
+                          value == null || value.isEmpty ? 'Enter username' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      initialValue: _data.description,
+                      decoration: InputDecoration(
+                        labelText: 'Description',
+                        border: const OutlineInputBorder(),
+                        fillColor: theme.colorScheme.surface,
+                        filled: true,
+                      ),
+                      style: theme.textTheme.bodyMedium,
+                      maxLines: 3,
+                      onChanged: (value) => _data.description = value,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildCitySearchField(theme),
+                    const SizedBox(height: 12),
+                    _buildSportSearchField(theme),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _saveProfile,
+                      child: const Text("Save Changes"),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-  );
-}
-
+    );
+  }
 }

@@ -56,18 +56,57 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _likedMeUsers.isEmpty
-              ? const Center(child: Text("No one liked you yet 🥲"))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _likedMeUsers.length,
-                  itemBuilder: (_, index) => _buildUserCard(_likedMeUsers[index]),
+Widget build(BuildContext context) {
+  final theme = Theme.of(context);
+
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Notifications'),
+      backgroundColor: theme.colorScheme.primary,
+      foregroundColor: theme.colorScheme.onPrimary,
+    ),
+    body: _isLoading
+        ? Center(
+            child: CircularProgressIndicator(color: theme.colorScheme.primary),
+          )
+        : _likedMeUsers.isEmpty
+            ? Center(
+                child: Text(
+                  "No one liked you yet 🥲",
+                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground),
                 ),
-    );
-  }
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _likedMeUsers.length,
+                itemBuilder: (_, index) {
+                  final user = _likedMeUsers[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    color: theme.colorScheme.surface,
+                    child: ListTile(
+                      title: Text(
+                        user.username,
+                        style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface),
+                      ),
+                      subtitle: Text(
+                        user.description,
+                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                      trailing: Icon(Icons.favorite, color: theme.colorScheme.error),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UserProfileScreen(userId: user.id),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+  );
+}
+
 }

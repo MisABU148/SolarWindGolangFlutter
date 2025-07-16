@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:solar_wind_flutter_app/features/feed/data/models/user.dart';
 import 'package:solar_wind_flutter_app/features/feed/data/services/feed_service.dart';
+import 'package:solar_wind_flutter_app/core/theme/theme_provider.dart';
+
 import 'profile_screen.dart';
 import 'my_profile_screen.dart';
 import 'notifications_screen.dart';
@@ -41,54 +44,57 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Scaffold(
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
             width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFF34BD5), Color(0xFFFBDA55)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
+            color: Theme.of(context).colorScheme.primaryContainer,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: IconButton(
-                    iconSize: 32,
-                    icon: const Icon(Icons.person, color: Colors.white),
-                    onPressed: () {
-                      final userId = 637451540;
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MyProfileScreen(userId: userId),
-                        ),
-                      );
-                    },
-                  ),
+                // Профиль
+                IconButton(
+                  iconSize: 32,
+                  icon: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimaryContainer),
+                  onPressed: () {
+                    const userId = 637451540;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MyProfileScreen(userId: userId),
+                      ),
+                    );
+                  },
                 ),
 
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: IconButton(
-                    iconSize: 32,
-                    icon: const Icon(Icons.notifications, color: Colors.white),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const NotificationsScreen(),
-                        ),
-                      );
-                    },
+                // Переключение темы
+                IconButton(
+                  iconSize: 28,
+                  icon: Icon(
+                    isDark ? Icons.light_mode : Icons.dark_mode,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
+                  onPressed: () {
+                    context.read<ThemeProvider>().toggleTheme();
+                  },
+                ),
+
+                IconButton(
+                  iconSize: 32,
+                  icon: Icon(Icons.notifications, color: Theme.of(context).colorScheme.onPrimaryContainer),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationsScreen(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -115,6 +121,7 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
                           child: Card(
                             elevation: 2,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            color: Theme.of(context).cardColor,
                             child: Stack(
                               children: [
                                 Padding(
@@ -122,23 +129,32 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(user.username,
-                                          style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold)),
+                                      Text(
+                                        user.username,
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                      ),
                                       const SizedBox(height: 8),
-                                      Text(user.description),
+                                      Text(
+                                        user.description,
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                      ),
                                       const SizedBox(height: 8),
                                       Wrap(
                                         spacing: 8,
                                         children: user.sportName
-                                            .map((sport) => Chip(label: Text(sport)))
+                                            .map((sport) => Chip(
+                                                  label: Text(sport),
+                                                  backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                                                  labelStyle: TextStyle(
+                                                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                                  ),
+                                                ))
                                             .toList(),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Positioned(
+                                const Positioned(
                                   top: 8,
                                   right: 8,
                                   child: LikeButton(),
@@ -173,12 +189,13 @@ class _LikeButtonState extends State<LikeButton>
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    _scaleAnimation =
-        Tween<double>(begin: 1.0, end: 1.5).animate(
-          CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-        );
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         _controller.reverse();
@@ -207,10 +224,11 @@ class _LikeButtonState extends State<LikeButton>
         iconSize: 32,
         icon: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+          transitionBuilder: (child, animation) =>
+              ScaleTransition(scale: animation, child: child),
           child: isLiked
               ? const Icon(Icons.favorite, color: Colors.red, key: ValueKey('liked'))
-              : const Icon(Icons.favorite_border, color: Colors.grey, key: ValueKey('unliked')),
+              : Icon(Icons.favorite_border, color: Theme.of(context).iconTheme.color, key: const ValueKey('unliked')),
         ),
         onPressed: _onTap,
       ),

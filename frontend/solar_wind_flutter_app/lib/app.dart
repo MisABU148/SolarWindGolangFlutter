@@ -4,9 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'features/auth/presentation/screens/welcome_screen.dart';
 import 'features/auth/presentation/screens/tgbot_auth.dart';
-import 'features/auth/presentation/screens/enter_code.dart';
 import 'features/feed/presentation/screen/user_feed_screen.dart';
 import 'features/auth/presentation/state/registration_provider.dart';
+import 'features/auth/presentation/screens/enter_code.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -29,26 +31,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => RegistrationProvider(),
-      child: MaterialApp(
-        title: 'SolarWind App',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
-          useMaterial3: true,
-        ),
-        debugShowCheckedModeBanner: false,
-        home: FutureBuilder<Widget>(
-          future: _decideStartScreen(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-            return snapshot.data!;
-          },
-        ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => RegistrationProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider(
+          Provider.of<ThemeProvider>(context, listen: false).isDarkMode
+        )),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'SolarWind App',
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode:
+                themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            debugShowCheckedModeBanner: false,
+            home: FutureBuilder<Widget>(
+              future: _decideStartScreen(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                return snapshot.data!;
+              },
+            ),
+          );
+        },
       ),
     );
   }
