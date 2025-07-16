@@ -129,6 +129,14 @@ Dark mode
 (https://drive.google.com/file/d/1rUrA0LvTAk-p4qhTr9KQ9zXwctN7TPTN/view?usp=sharing)
 (https://drive.google.com/file/d/13zPn_W-6SLXOZwo6mgkHfUXmyQMrz9DY/view?usp=sharing)
 
+Different languages
+(https://drive.google.com/file/d/1wx7N1y_sst97yux6Q5WILJkv_42EZDRw/view?usp=sharing)
+(https://drive.google.com/file/d/1PsMHlrNdQYnBHbyt3H27Xje_CxXMhimc/view?usp=sharing)
+
+Telegram authentication
+(https://drive.google.com/file/d/105p0MRWr_530TB5UxI8CnBZADy4zD5ae/view?usp=sharing)
+
+
 📋 Project Management
 🗂️ GitHub Projects для трекинга задач
 
