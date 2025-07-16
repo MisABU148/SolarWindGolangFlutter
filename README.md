@@ -19,7 +19,9 @@
 
 ## 🏗️ Architecture
 
-![Architecture Diagram](https://drive.google.com/file/d/13fDBf8rgqogzYe9W8dYGhZZLVboNwCkv/view?usp=sharing)
+![Architecture Diagram]
+[frintend](https://drive.google.com/file/d/1cFFs8dMEnyk5t88QDQKv6kpkd2mc_QVq/view?usp=sharing)
+[backend](https://drive.google.com/file/d/13fDBf8rgqogzYe9W8dYGhZZLVboNwCkv/view?usp=sharing)
 
 - **Backend**: Golang REST API, PostgreSQL, Telegram Auth
 - **Frontend**: Flutter (Web + Mobile), CI/CD, i18n
@@ -118,12 +120,14 @@ CI/CD (GitHub Actions / Vercel)	✅
 ## 🗃️ Database Schema
 📊 Ниже представлена схема базы данных:
 
-[frintend](https://drive.google.com/file/d/1cFFs8dMEnyk5t88QDQKv6kpkd2mc_QVq/view?usp=sharing)
-[backend](https://drive.google.com/file/d/13fDBf8rgqogzYe9W8dYGhZZLVboNwCkv/view?usp=sharing)
+([https://drive.google.com/file/d/1582aUNTyGs4boeZuKjFdMgATzkniZMgu/view?usp=sharing](https://drive.google.com/file/d/1582aUNTyGs4boeZuKjFdMgATzkniZMgu/view?usp=sharing))
 
 
 ## 📸 Screenshots
 
+Dark mode
+(https://drive.google.com/file/d/1rUrA0LvTAk-p4qhTr9KQ9zXwctN7TPTN/view?usp=sharing)
+(https://drive.google.com/file/d/13zPn_W-6SLXOZwo6mgkHfUXmyQMrz9DY/view?usp=sharing)
 
 📋 Project Management
 🗂️ GitHub Projects для трекинга задач
