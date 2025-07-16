@@ -12,14 +12,14 @@
 - Пользоваться на любом устройстве: Android, iOS, Web
 - Переключаться между тёмной/светлой темой и языками (RU/EN)
 
-🎨 **[Figma дизайн (демо)](https://www.figma.com/design/si98563MfBSXuDtOfV8655/FitFlame?t=LBPNpHfkUVk9VxQt-0)**  
-📲 **Деплой (Frontend)**: [https://solarwind-app.vercel.app](https://solarwind-app.vercel.app)
+🎨 **[Figma дизайн (демо)]([https://www.figma.com/design/si98563MfBSXuDtOfV8655/FitFlame?t=LBPNpHfkUVk9VxQt-0](https://www.figma.com/design/si98563MfBSXuDtOfV8655/FitFlame?node-id=27-388&t=AbeqimJUuoFLRUwz-1))**  
+📲 **Деплой (Frontend)**: ([https://solarwind-app.vercel.app](https://misabu148.github.io/SolarWindGolangFlutter/)
 
 ---
 
 ## 🏗️ Architecture
 
-![Architecture Diagram](docs/architecture.png) <!-- замените на актуальный путь -->
+![Architecture Diagram](https://drive.google.com/file/d/13fDBf8rgqogzYe9W8dYGhZZLVboNwCkv/view?usp=sharing)
 
 - **Backend**: Golang REST API, PostgreSQL, Telegram Auth
 - **Frontend**: Flutter (Web + Mobile), CI/CD, i18n
@@ -118,10 +118,12 @@ CI/CD (GitHub Actions / Vercel)	✅
 ## 🗃️ Database Schema
 📊 Ниже представлена схема базы данных:
 
-<!-- замените путь -->
+[frintend](https://drive.google.com/file/d/1cFFs8dMEnyk5t88QDQKv6kpkd2mc_QVq/view?usp=sharing)
+[backend](https://drive.google.com/file/d/13fDBf8rgqogzYe9W8dYGhZZLVboNwCkv/view?usp=sharing)
+
 
 ## 📸 Screenshots
-Экран профиля	Лента пользователей	Лайк и анимация
+
 
 📋 Project Management
 🗂️ GitHub Projects для трекинга задач
