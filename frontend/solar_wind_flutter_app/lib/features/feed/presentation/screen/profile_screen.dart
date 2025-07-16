@@ -12,7 +12,7 @@ class UserProfileScreen extends StatefulWidget {
   State<UserProfileScreen> createState() => _UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> {
+class _UserProfileScreenState extends State<UserProfileScreen> with SingleTickerProviderStateMixin {
   final _profileService = ProfileService();
   final _likeService = LikeService();
 
@@ -20,10 +20,34 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   User? _user;
   bool _liked = false;
 
+  late AnimationController _likeAnimationController;
+  late Animation<double> _likeScaleAnimation;
+
   @override
   void initState() {
     super.initState();
     _loadUser();
+
+    _likeAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _likeScaleAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
+      CurvedAnimation(parent: _likeAnimationController, curve: Curves.easeOutBack),
+    );
+
+    _likeAnimationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _likeAnimationController.reverse();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _likeAnimationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUser() async {
@@ -44,6 +68,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     try {
       await _likeService.likeUser(widget.userId);
       setState(() => _liked = true);
+      _likeAnimationController.forward();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('User liked!')),
       );
@@ -70,45 +95,74 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: _liked
-                ? const Icon(Icons.favorite, color: Colors.red, size: 36)
-                : IconButton(
-                    icon: const Icon(Icons.favorite_border, size: 36),
-                    onPressed: _like,
-                    tooltip: 'Like',
-                    color: Colors.redAccent,
-                  ),
-          )
+            child: ScaleTransition(
+              scale: _likeScaleAnimation,
+              child: IconButton(
+                iconSize: 36,
+                icon: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                  child: _liked
+                      ? const Icon(Icons.favorite, color: Colors.red, key: ValueKey('liked'))
+                      : const Icon(Icons.favorite_border, color: Colors.grey, key: ValueKey('unliked')),
+                ),
+                onPressed: _like,
+                tooltip: 'Like',
+              ),
+            ),
+          ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _user!.description,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+      body: Column(
+        children: [
+          // Аватарка без пульсации
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.blueAccent,
+              child: Text(
+                _user!.username.isNotEmpty ? _user!.username[0].toUpperCase() : '?',
+                style: const TextStyle(fontSize: 48, color: Colors.white, fontWeight: FontWeight.bold),
+              ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'City: ${_user!.cityName}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+          ),
+
+          // Контент
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _user!.description,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'City: ${_user!.cityName}',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                    ),
+                    const SizedBox(height: 20),
+                    Wrap(
+                      spacing: 8,
+                      children: _user!.sportName
+                          .map((sport) => Chip(
+                                label: Text(
+                                  sport,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 8,
-              children: _user!.sportName
-                  .map((sport) => Chip(
-                        label: Text(
-                          sport,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

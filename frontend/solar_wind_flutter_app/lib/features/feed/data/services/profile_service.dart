@@ -19,7 +19,7 @@ class ProfileService {
     final response = await dio.get(
       'https://solar-wind-gymbro.ru/profiles/api/me',
       options: Options(headers: {
-        'Authorization-telegram-id': telegramId,
+        'Authorization-telegram-id': userId,
         'Authorize': token,
       }),
     );

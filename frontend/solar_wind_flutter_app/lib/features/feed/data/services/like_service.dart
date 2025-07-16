@@ -15,8 +15,12 @@ class LikeService {
       throw Exception('Missing token or telegram_id in SharedPreferences');
     }
 
+    print(telegramId);
+    print(token);
+    print(user2);
+
     await dio.post(
-      'https://solar-wind-gymbro.ru/likes/api/',
+      'https://solar-wind-gymbro.ru/likes',
       options: Options(
         headers: {
           'receiver': user2,
