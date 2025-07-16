@@ -51,7 +51,6 @@ class WelcomeScreen extends StatelessWidget {
   );
 }
 
-
   @override
 Widget build(BuildContext context) {
   final localeProvider = Provider.of<LocaleProvider>(context);
