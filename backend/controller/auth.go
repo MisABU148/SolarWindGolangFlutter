@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"backend/model"
-	"backend/repository"
 	"backend/service"
 	"encoding/json"
 	"net/http"
@@ -10,7 +8,18 @@ import (
 )
 
 type AuthController struct {
-	UserRepo *repository.UserRepository
+	UserService *service.UserService
+	AuthCache   *service.AuthCache
+}
+
+func NewAuthController(
+	userService *service.UserService,
+	authCache *service.AuthCache,
+) *AuthController {
+	return &AuthController{
+		UserService: userService,
+		AuthCache:   authCache,
+	}
 }
 
 func (a *AuthController) PostCode(w http.ResponseWriter, r *http.Request) {
@@ -25,11 +34,16 @@ func (a *AuthController) PostCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service.SetCode(code, tgID)
+	a.AuthCache.SetCode(code, tgID)
 	w.WriteHeader(http.StatusOK)
 }
 
 func (a *AuthController) GetTokenByCode(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	codeStr := r.URL.Query().Get("code")
 	code, err := strconv.ParseInt(codeStr, 10, 64)
 	if err != nil {
@@ -37,37 +51,28 @@ func (a *AuthController) GetTokenByCode(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	tgID, ok := service.GetUserIDByCode(code)
+	tgID, ok := a.AuthCache.GetUserIDByCode(code)
 	if !ok {
 		http.Error(w, "Code expired or invalid", http.StatusUnauthorized)
 		return
 	}
 
-	// Check or create user
-	user, err := a.UserRepo.GetByTelegramID(tgID)
+	result, err := a.UserService.CreateOrGetTelegramUser(tgID)
 	if err != nil {
-		userID, err := a.UserRepo.CreateTelegramUser(model.User{
-			TelegramID: tgID,
-			UserName:   "tg_" + strconv.FormatInt(tgID, 10),
-			Alias:      "telegram_user",
-		})
-		if err != nil {
-			http.Error(w, "Could not create user", http.StatusInternalServerError)
-			return
-		}
-		tgID = userID
-	} else {
-		tgID = user.ID
-	}
-
-	// Generate token
-	token, err := service.GenerateJWT(tgID)
-	if err != nil {
-		http.Error(w, "JWT error", http.StatusInternalServerError)
+		http.Error(w, "User operation failed: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{
-		"token": token,
+	token, err := service.GenerateJWT(result.UserID)
+	if err != nil {
+		http.Error(w, "JWT generation failed", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"token":   token,
+		"user_id": result.UserID,
+		"is_new":  result.IsNewUser,
 	})
 }
