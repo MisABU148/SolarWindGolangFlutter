@@ -16,7 +16,6 @@ import (
 )
 
 func main() {
-	// connStr := fmt.Sprintf("host=localhost port=5434 user=postgres password=postgres dbname=userdb sslmode=disable")
 
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -53,7 +52,9 @@ func main() {
 	sportService := &service.SportService{Repo: sportRepo}
 	sportController := &controller.SportController{Service: sportService}
 
-	authController := &controller.AuthController{UserRepo: userRepo}
+	authCache := service.NewAuthCache(userRepo)
+
+	authController := controller.NewAuthController(userService, authCache)
 
 	http.HandleFunc("/api/auth/custom-auth", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
