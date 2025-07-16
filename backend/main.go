@@ -4,6 +4,7 @@ import (
 	"backend/controller"
 	"backend/db"
 	"backend/middleware"
+	"backend/notifier"
 	"backend/repository"
 	"backend/service"
 	"database/sql"
@@ -13,9 +14,19 @@ import (
 	"os"
 
 	_ "github.com/lib/pq"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
+	fmt.Printf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_NAME"),
+	)
 
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -36,8 +47,18 @@ func main() {
 		log.Fatal("Schema init error:", err)
 	}
 
-	if err := db.SeedInitialData(dbConn, "./db/json/cities-names.json", "./db/json/sports.json"); err != nil {
-		log.Fatal("Seeding error:", err)
+	citiesPath := "./db/json/cities-names.json"
+	sportsPath := "./db/json/sports.json"
+
+	// Проверяем, существуют ли файлы
+	if _, err := os.Stat(citiesPath); os.IsNotExist(err) {
+		log.Println("Файл не найден:", citiesPath)
+	} else if _, err := os.Stat(sportsPath); os.IsNotExist(err) {
+		log.Println("Файл не найден:", sportsPath)
+	} else {
+		if err := db.SeedInitialData(dbConn, citiesPath, sportsPath); err != nil {
+			log.Fatal("Seeding error:", err)
+		}
 	}
 
 	userRepo := &repository.UserRepository{DB: dbConn}
@@ -52,11 +73,20 @@ func main() {
 	sportService := &service.SportService{Repo: sportRepo}
 	sportController := &controller.SportController{Service: sportService}
 
+	likesRepo := &repository.LikesRepository{DB: dbConn}
+	matchNotifier := &notifier.HttpMatchNotifier{} // твоя реализация интерфейса MatchNotifier
+
+	likesService := &service.LikesService{
+		Repo:     likesRepo,
+		Notifier: matchNotifier,
+	}
+	likesController := controller.NewLikesController(likesService)
+
 	authCache := service.NewAuthCache(userRepo)
 
 	authController := controller.NewAuthController(userService, authCache)
 
-	http.HandleFunc("/api/auth/custom-auth", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/custom-auth", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			authController.GetTokenByCode(w, r)
@@ -92,6 +122,8 @@ func main() {
 	http.HandleFunc("/api/sports", sportController.GetSportsHandler)
 	http.HandleFunc("/api/sports/pagination", sportController.GetPaginatedSportsHandler)
 	http.HandleFunc("/api/sports/search", sportController.SearchSportsHandler)
+
+	http.HandleFunc("/api/likes", likesController.HandleLike)
 
 	log.Println("Server started at :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
