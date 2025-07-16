@@ -9,6 +9,8 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'app.dart';
 
+import 'core/localization/locale_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -26,6 +28,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => RegistrationProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider(isDarkMode)),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()), // <-- добавь сюда
       ],
       child: const MyApp(),
     ),

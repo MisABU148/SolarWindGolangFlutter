@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hive/hive.dart';
 import '../models/user.dart';
+import 'package:solar_wind_flutter_app/mock/mock_users.dart';
 
 class FeedService {
   final Dio dio;
@@ -26,13 +27,16 @@ class FeedService {
         }),
       );
 
+      print(response);
+      print('Response status: ${response.statusCode}');
+      print('Response data: ${response.data}');
+
       if (response.statusCode == 200) {
         final data = response.data as List;
         final users = data.map((json) => User.fromJson(json)).toList();
 
-        final enriched = [...users, ..._mockUsers];
+        final enriched = [...users, ...mockUsers];
 
-        // 💾 Save to Hive
         final box = Hive.box('feedBox');
         await box.put('users', enriched);
 
@@ -41,7 +45,6 @@ class FeedService {
         throw Exception('Failed to fetch feed. Status: ${response.statusCode}');
       }
     } catch (e) {
-      // 🌐 Fallback to cached
       print('Failed to fetch online. Using cached. Error: $e');
       final box = Hive.box('feedBox');
       final cachedUsers = box.get('users') as List<User>?;
@@ -50,49 +53,6 @@ class FeedService {
       throw Exception('No internet and no cached data available');
     }
   }
-
-  List<User> get _mockUsers => [
-        User(
-          id: 1001,
-          username: 'fake_user_1',
-          description: 'Just testing things out',
-          cityName: 'Fake City',
-          preferredGymTime: [10],
-          sportName: ['TestSport'],
-        ),
-        User(
-          id: 1002,
-          username: 'test_account_2',
-          description: 'Here for fun 🧪',
-          cityName: 'SimCity',
-          preferredGymTime: [17],
-          sportName: ['Debugging'],
-        ),
-        User(
-          id: 1003,
-          username: 'gym_bot_3000',
-          description: '💥 Automated fitness bot',
-          cityName: 'Botland',
-          preferredGymTime: [6],
-          sportName: ['Powerlifting', 'Running'],
-        ),
-        User(
-          id: 1004,
-          username: 'qa_guru',
-          description: 'Finding bugs and gains 🐛🏋️',
-          cityName: 'QApolis',
-          preferredGymTime: [8],
-          sportName: ['CrossFit'],
-        ),
-        User(
-          id: 1005,
-          username: 'frontend_beast',
-          description: 'CSS by day, squats by night',
-          cityName: 'Codeville',
-          preferredGymTime: [20],
-          sportName: ['Yoga', 'Climbing'],
-        ),
-      ];
 }
 
 

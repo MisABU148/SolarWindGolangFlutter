@@ -69,7 +69,12 @@ class _ChooseSportScreenState extends State<ChooseSportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Choose Sports')),
+      appBar: AppBar(
+        title: const Text("Choose Sports"),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer, 
+        elevation: 0,
+      ),
       body: Column(
         children: [
           if (selectedSports.isNotEmpty)

@@ -72,7 +72,12 @@ class _GenderAndBirthScreenState extends State<GenderAndBirthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tell us about you')),
+      appBar: AppBar(
+        title: const Text('Tell us about you'),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer, 
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

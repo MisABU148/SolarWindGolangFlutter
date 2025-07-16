@@ -46,7 +46,12 @@ class _EnterCodeScreenState extends State<EnterCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Enter Code')),
+      appBar: AppBar(
+        title: const Text("Enter code"),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer, 
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
