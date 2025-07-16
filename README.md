@@ -1,94 +1,134 @@
 # 🏋️‍♂️ Solar Wind – Workout Partner Finder
 
-## 📌 Project Overview
+## 📌 Overview
 
-**Solar Wind** is a lightweight matchmaking platform designed to help people find gym or workout partners in their area. Users can:
+**Solar Wind** — это платформа для поиска спортивных напарников поблизости. Никакого дейтинга — только здоровые привычки, совместные тренировки и мотивация.
 
-- Create a personal profile with sports interests, city, and gym schedule
-- Browse and filter other users based on preferences
-- Connect with like-minded individuals for workouts
+🔎 Пользователи могут:
+- Зарегистрироваться через Telegram
+- Создать и редактировать профиль (интересы, график, город)
+- Смотреть ленту подходящих партнёров
+- Отправлять лайки (при совпадении – дружба!)
+- Пользоваться на любом устройстве: Android, iOS, Web
+- Переключаться между тёмной/светлой темой и языками (RU/EN)
 
-> Think of it as a fitness-focused social app — not for dating, but for building healthy training habits together.
-
-🎨 **Design prototype**: [Figma Design]([https://www.figma.com/file/YOUR-FIGMA-LINK-HERE](https://www.figma.com/design/si98563MfBSXuDtOfV8655/FitFlame?t=LBPNpHfkUVk9VxQt-0))
+🎨 **[Figma дизайн (демо)](https://www.figma.com/design/si98563MfBSXuDtOfV8655/FitFlame?t=LBPNpHfkUVk9VxQt-0)**  
+📲 **Деплой (Frontend)**: [https://solarwind-app.vercel.app](https://solarwind-app.vercel.app)
 
 ---
 
-## 🚀 How to Run the Project
+## 🏗️ Architecture
 
-### 1. Clone the repository
+![Architecture Diagram](docs/architecture.png) <!-- замените на актуальный путь -->
+
+- **Backend**: Golang REST API, PostgreSQL, Telegram Auth
+- **Frontend**: Flutter (Web + Mobile), CI/CD, i18n
+- **Auth**: JWT, Telegram Bot
+- **Infra**: Docker Compose, GitHub Actions CI/CD
+
+---
+
+## 📦 Tech Stack
+
+| Layer     | Tech                                             |
+|-----------|--------------------------------------------------|
+| Backend   | Go (net/http), PostgreSQL, JWT, Telegram API     |
+| Frontend  | Flutter (Web, Android, iOS)                      |
+| Database  | PostgreSQL                                       |
+| Auth      | Telegram + JWT                                   |
+| DevOps    | Docker Compose, GitHub Actions, Vercel           |
+| Testing   | Unit + Integration (Go), Widget Tests (Flutter)  |
+| UI        | Responsive UI, Dark Mode, Custom Animations      |
+| I18n      | RU 🇷🇺 / EN 🇬🇧 localization                       |
+
+---
+
+## 🚀 Getting Started
+
+### Backend Setup
 
 ```bash
-git clone https://github.com/your-username/gymbuddy-backend.git
+git clone https://github.com/your-org/gymbuddy-backend.git
 cd gymbuddy-backend
-```
-### 2. Install dependencies
-Make sure you have Go 1.20+ installed.
-
-```bash
 go mod tidy
+docker-compose up --build
 ```
 
-### 3. Run the application
-```bash
-go run main.go
-```
-The backend will start on:
+Backend будет доступен по адресу:
 📍 http://localhost:8080
 
-### 4. Project Structure
-```graphql
-backend/
-├── main.go                 # Entry point
-├── controller/             # HTTP handlers
-├── service/                # Business logic
-├── repository/             # Data access layer
-├── model/                  # Data models & DTOs
-├── db/
-│   ├── schema.sql          # DB schema
-│   └── json/               # Seed data for cities and sports
-├── auth/                   # JWT authentication
+Frontend Setup
+```bash
+cd flutter-app
+flutter pub get
+flutter run -d chrome
 ```
 🔐 Authentication
-🧾 Registration
+Endpoint	Method	Description
+/api/login	POST	Вход через Telegram Bot
+/api/me	GET	Получить профиль
+/api/me	PUT	Обновить профиль
+/api/me	DELETE	Удалить аккаунт
+
+📦 Используйте JWT в заголовке:
+
 ```http
-POST /api/me
-Create a new user
-```
-
-Accepts username, password, profile info
-
-🔑 Login
-```http
-POST /api/login
-```
-Returns a JWT token
-
-Use the token to access protected endpoints
-
-🔒 Authorization
-Include the token in the request header:
-
-```makefile
-Authorization: Bearer YOUR_JWT_TOKEN
-📡 Key API Endpoints
+Authorization: Bearer YOUR_TOKEN
+🌐 API Overview
 Method	Endpoint	Description
-POST	/api/me	Register a new user
-POST	/api/login	Login and receive JWT
-GET	/api/me	Get your profile
-PUT	/api/me	Update your profile
-DELETE	/api/me	Delete your account
-GET	/api/getUsers	Get all users
-GET	/api/cities	Get list of cities
-GET	/api/sports	Get list of sports
-GET	/api/cities/search	Search cities
-GET	/api/sports/search	Search sports
+POST	/api/me	Создать/обновить профиль
+GET	/api/getUsers	Получить список пользователей
+GET	/api/cities	Список городов
+GET	/api/sports	Список видов спорта
+POST	/api/match	Лайкнуть пользователя
+GET	/api/feed	Лента подходящих людей
 ```
-🛠 Tech Stack
-Golang (net/http)
 
-SQLite (via modernc.org/sqlite)
+📘 Swagger-документация: /swagger/index.html
 
-JSON-based seeding for cities & sports
+🧪 Testing
+✅ Unit-тесты (контроллеры, сервисы)
 
-JWT authentication
+✅ Интеграционные тесты API
+
+✅ Widget-тесты для Flutter-интерфейса
+
+✅ Покрытие login flow, feed, match
+
+# Backend
+```bach
+go test ./...
+```
+
+# Flutter
+flutter test
+🧩 Features Summary
+Функция	✅ Статус
+Telegram Auth	✅
+JWT авторизация	✅
+Создание/редактирование профиля	✅
+Лента подходящих пользователей	✅
+Лайки и совпадения	✅
+Анимация на лайк	✅
+Поддержка RU/EN	✅
+Тёмная и светлая тема	✅
+Docker Compose	✅
+CI/CD (GitHub Actions / Vercel)	✅
+
+## 🗃️ Database Schema
+📊 Ниже представлена схема базы данных:
+
+<!-- замените путь -->
+
+## 📸 Screenshots
+Экран профиля	Лента пользователей	Лайк и анимация
+
+📋 Project Management
+🗂️ GitHub Projects для трекинга задач
+
+✅ Регулярные meaningful pull-requests
+
+## 👥 Роли в команде:
+
+Backend (Go): Ilyina Maria
+Frontend (Flutter): Daria Nikolaeva
