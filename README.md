@@ -2,15 +2,15 @@
 
 ## 📌 Overview
 
-**Solar Wind** — это платформа для поиска спортивных напарников поблизости. Никакого дейтинга — только здоровые привычки, совместные тренировки и мотивация.
+**Solar Wind** is a platform for finding sports partners nearby. No dating, just healthy habits, joint training and motivation.
 
-🔎 Пользователи могут:
-- Зарегистрироваться через Telegram
-- Создать и редактировать профиль (интересы, график, город)
-- Смотреть ленту подходящих партнёров
-- Отправлять лайки (при совпадении – дружба!)
-- Пользоваться на любом устройстве: Android, iOS, Web
-- Переключаться между тёмной/светлой темой и языками (RU/EN)
+🔎 Users can:
+- Register via Telegram
+- Create and edit a profile (interests, schedule, city)
+- View the feed of suitable partners
+- Send likes (if it matches, friendship!)
+- Use on any device: Android, iOS, Web
+- Switch between dark/light theme and languages (RU/EN)
 
 🎨 **[Figma дизайн (демо)]([https://www.figma.com/design/si98563MfBSXuDtOfV8655/FitFlame?t=LBPNpHfkUVk9VxQt-0](https://www.figma.com/design/si98563MfBSXuDtOfV8655/FitFlame?node-id=27-388&t=AbeqimJUuoFLRUwz-1))**  
 📲 **Деплой (Frontend)**: ([https://solarwind-app.vercel.app](https://misabu148.github.io/SolarWindGolangFlutter/)
@@ -56,8 +56,10 @@ go mod tidy
 docker-compose up --build
 ```
 
-Backend будет доступен по адресу:
-📍 http://localhost:8080
+## Backend available at:
+📍 [deploy](https://solar-wind-gymbro.ru/)
+## Swagger:
+📍 (https://solar-wind-gymbro.ru/deckShuffle/swagger-ui/index.html#/)
 
 Frontend Setup
 ```bash
@@ -66,36 +68,33 @@ flutter pub get
 flutter run -d chrome
 ```
 🔐 Authentication
+```http
 Endpoint	Method	Description
 /api/login	POST	Вход через Telegram Bot
 /api/me	GET	Получить профиль
 /api/me	PUT	Обновить профиль
 /api/me	DELETE	Удалить аккаунт
+```
 
-📦 Используйте JWT в заголовке:
-
-```http
+📦 Use JWT in header:
 Authorization: Bearer YOUR_TOKEN
+
 🌐 API Overview
+```http
 Method	Endpoint	Description
 POST	/api/me	Создать/обновить профиль
 GET	/api/getUsers	Получить список пользователей
 GET	/api/cities	Список городов
 GET	/api/sports	Список видов спорта
 POST	/api/match	Лайкнуть пользователя
-GET	/api/feed	Лента подходящих людей
+GET	/api/create-deck	Лента подходящих людей
 ```
 
-📘 Swagger-документация: /swagger/index.html
-
 🧪 Testing
-✅ Unit-тесты (контроллеры, сервисы)
-
-✅ Интеграционные тесты API
-
-✅ Widget-тесты для Flutter-интерфейса
-
-✅ Покрытие login flow, feed, match
+✅ Unit tests (controllers, services)
+✅ API integration tests
+✅ Widget tests for the Flutter interface
+✅ Login flow, feed, match coverage
 
 # Backend
 ```bach
@@ -105,20 +104,19 @@ go test ./...
 # Flutter
 flutter test
 🧩 Features Summary
-Функция	✅ Статус
-Telegram Auth	✅
-JWT авторизация	✅
-Создание/редактирование профиля	✅
-Лента подходящих пользователей	✅
-Лайки и совпадения	✅
-Анимация на лайк	✅
-Поддержка RU/EN	✅
-Тёмная и светлая тема	✅
-Docker Compose	✅
-CI/CD (GitHub Actions / Vercel)	✅
+Telegram Auth | ✅ Implemented
+JWT Authentication | ✅ Implemented
+Create/Edit Profile | ✅ Implemented
+Matching Feed | ✅ Implemented
+Likes & Matches | ✅ Implemented
+Like Animation | ✅ Implemented
+RU/EN Support | ✅ Implemented
+Dark/Light Theme | ✅ Implemented
+Docker Compose | ✅ Implemented
+CI/CD (GitHub Actions/Vercel) | ✅ Implemented
 
 ## 🗃️ Database Schema
-📊 Ниже представлена схема базы данных:
+📊 The database schema is shown below:
 
 ([https://drive.google.com/file/d/1582aUNTyGs4boeZuKjFdMgATzkniZMgu/view?usp=sharing](https://drive.google.com/file/d/1582aUNTyGs4boeZuKjFdMgATzkniZMgu/view?usp=sharing))
 
@@ -138,11 +136,11 @@ Telegram authentication
 
 
 📋 Project Management
-🗂️ GitHub Projects для трекинга задач
+🗂️ GitHub Projects for tracking issues
 
-✅ Регулярные meaningful pull-requests
+✅ Regular meaningful pull-requests
 
-## 👥 Роли в команде:
+## 👥 Team:
 
 Backend (Go): Ilyina Maria
 Frontend (Flutter): Daria Nikolaeva
