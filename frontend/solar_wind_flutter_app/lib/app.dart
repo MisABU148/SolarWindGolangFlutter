@@ -17,15 +17,11 @@ class MyApp extends StatelessWidget {
     final prefs = await SharedPreferences.getInstance();
 
     final isRegistered = prefs.getBool('isRegistered') ?? false;
-    final hasTelegramToken =
-        prefs.containsKey('token') && prefs.containsKey('telegram_id');
 
     if (isRegistered) {
       return const UserFeedScreen();
-    } else if (hasTelegramToken) {
-      return const WelcomeScreen();
     } else {
-      return TelegramAuthScreen();
+      return WelcomeScreen();
     }
   }
 

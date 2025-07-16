@@ -62,3 +62,6 @@ func (s *UserService) GetUsers() ([]model.UserDTO, error) {
 	}
 	return result, nil
 }
+func (s *UserService) GetUserByUsername(username string) (*model.User, error) {
+	return s.Repo.GetUserByUsername(username)
+}
