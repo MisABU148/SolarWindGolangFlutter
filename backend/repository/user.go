@@ -1,9 +1,10 @@
 package repository
 
 import (
+	"backend/mapper"
 	"backend/model"
 	"database/sql"
-	"encoding/json"
+	"fmt"
 )
 
 type UserRepository struct {
@@ -11,75 +12,81 @@ type UserRepository struct {
 }
 
 func (r *UserRepository) CreateUser(user model.User) (int64, error) {
-	preferredTimeJSON, err := json.Marshal(user.PreferredGymTime)
+	tx, err := r.DB.Begin()
 	if err != nil {
 		return 0, err
 	}
+	defer tx.Rollback()
 
-	sportsJSON, err := json.Marshal(user.SportId)
-	if err != nil {
-		return 0, err
-	}
-
-	stmt, err := r.DB.Prepare(`
-		INSERT INTO users(username, password_hash, alias, description, age, preferredgender, gender, city_id, preferred_gym_time, sport_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+	stmt := `
+		INSERT INTO users (telegram_id, username, description, age, gender, preferred_gender, city_id, preferred_gym_time, verified)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id
-	`)
-	if err != nil {
-		return 0, err
-	}
-	defer stmt.Close()
+	`
 
 	var userID int64
-	err = stmt.QueryRow(
+	err = tx.QueryRow(stmt,
+		user.TelegramID,
 		user.UserName,
-		user.PasswordHash,
-		user.Alias,
 		user.Description,
 		user.Age,
-		user.PreferredGender,
 		user.Gender,
-		user.CityId,
-		string(preferredTimeJSON),
-		string(sportsJSON),
+		user.PreferredGender,
+		user.CityID,
+		mapper.MapGymTimeFromBits(user.PreferredGymTime),
+		user.Verified,
 	).Scan(&userID)
 	if err != nil {
 		return 0, err
 	}
 
-	return userID, nil
+	for _, sportID := range user.SportIDs {
+		_, err = tx.Exec(`INSERT INTO user_sport (user_id, sport_id) VALUES ($1, $2)`, userID, sportID)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	return userID, tx.Commit()
 }
 
-func (r *UserRepository) GetUserByID(id int64) (*model.User, error) {
-	row := r.DB.QueryRow(`
-		SELECT id, username, password_hash, alias, description, age, preferredgender, gender, city_id, preferred_gym_time, sport_id
-		FROM users
-		WHERE id = $1
-	`, id)
+func (r *UserRepository) GetUserByID(id int64) (*model.UserDTO, error) {
+	var user model.UserDTO
+	var gymTime int
 
-	var user model.User
-	var gymTimeJSON, sportsJSON string
-
-	err := row.Scan(
+	err := r.DB.QueryRow(`
+		SELECT id, telegram_id, username, description, age, gender, preferred_gender, city_id, preferred_gym_time
+		FROM users WHERE id = $1
+	`, id).Scan(
 		&user.ID,
-		&user.UserName,
-		&user.PasswordHash,
-		&user.Alias,
+		&user.TelegramID,
+		&user.Username,
 		&user.Description,
 		&user.Age,
-		&user.PreferredGender,
 		&user.Gender,
-		&user.CityId,
-		&gymTimeJSON,
-		&sportsJSON,
+		&user.PreferredGender,
+		&user.CityID,
+		&gymTime,
 	)
+	// fmt.Print(err)
 	if err != nil {
 		return nil, err
 	}
+	user.PreferredGymTime = mapper.MapGymTimeFromBits(gymTime)
 
-	_ = json.Unmarshal([]byte(gymTimeJSON), &user.PreferredGymTime)
-	_ = json.Unmarshal([]byte(sportsJSON), &user.SportId)
+	rows, err := r.DB.Query(`SELECT sport_id FROM user_sport WHERE user_id = $1`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var sportID int64
+		if err := rows.Scan(&sportID); err != nil {
+			return nil, err
+		}
+		user.SportIDs = append(user.SportIDs, sportID)
+	}
 
 	return &user, nil
 }
@@ -90,96 +97,146 @@ func (r *UserRepository) DeleteUserByID(id int64) error {
 }
 
 func (r *UserRepository) UpdateUser(user model.User) error {
-	gymTimeJSON, _ := json.Marshal(user.PreferredGymTime)
-	sportsJSON, _ := json.Marshal(user.SportId)
+	tx, err := r.DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 
-	_, err := r.DB.Exec(`
-		UPDATE users SET
-			username = $1, password_hash = $2, alias = $3, description = $4, age = $5,
-			preferredgender = $6, gender = $7, city_id = $8, preferred_gym_time = $9, sport_id = $10
-		WHERE id = $11
+	_, err = tx.Exec(`UPDATE users SET
+			telegram_id = $1,
+			username = $2,
+			description = $3,
+			age = $4,
+			gender = $5,
+			preferred_gender = $6,
+			city_id = $7,
+			preferred_gym_time = $8
+		WHERE id = $9
 	`,
+		user.TelegramID,
 		user.UserName,
-		user.PasswordHash,
-		user.Alias,
 		user.Description,
 		user.Age,
-		user.PreferredGender,
 		user.Gender,
-		user.CityId,
-		string(gymTimeJSON),
-		string(sportsJSON),
+		user.PreferredGender,
+		user.CityID,
+		user.PreferredGymTime,
 		user.ID,
 	)
-	return err
+	fmt.Printf("update user error %s", err)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM user_sport WHERE user_id = $1`, user.ID)
+	if err != nil {
+		return err
+	}
+
+	for _, sportID := range user.SportIDs {
+		_, err = tx.Exec(`INSERT INTO user_sport (user_id, sport_id) VALUES ($1, $2)`, user.ID, sportID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
-func (r *UserRepository) GetAllUsers() ([]model.User, error) {
+func (r *UserRepository) GetAllUsers() ([]model.UserDTO, error) {
 	rows, err := r.DB.Query(`
-		SELECT id, username, password_hash, alias, description, age, preferredgender, gender, city_id, preferred_gym_time, sport_id
+		SELECT id, telegram_id, username, description, age, gender, preferred_gender, city_id, preferred_gym_time
 		FROM users
 	`)
+	fmt.Printf("getall users error %s", err)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []model.User
+	var users []model.UserDTO
 	for rows.Next() {
-		var user model.User
-		var gymTimeJSON, sportsJSON string
+		var user model.UserDTO
+		var gymTime int
 		err := rows.Scan(
 			&user.ID,
-			&user.UserName,
-			&user.PasswordHash,
-			&user.Alias,
+			&user.TelegramID,
+			&user.Username,
 			&user.Description,
 			&user.Age,
-			&user.PreferredGender,
 			&user.Gender,
-			&user.CityId,
-			&gymTimeJSON,
-			&sportsJSON,
+			&user.PreferredGender,
+			&user.CityID,
+			&gymTime,
 		)
+
+		fmt.Printf("get all users error %s", err)
 		if err != nil {
-			continue
+			return nil, err
 		}
-		_ = json.Unmarshal([]byte(gymTimeJSON), &user.PreferredGymTime)
-		_ = json.Unmarshal([]byte(sportsJSON), &user.SportId)
+		user.PreferredGymTime = mapper.MapGymTimeFromBits(gymTime)
+
+		sportRows, err := r.DB.Query(`SELECT sport_id FROM user_sport WHERE user_id = $1`, user.ID)
+		if err != nil {
+			return nil, err
+		}
+		defer sportRows.Close()
+
+		user.SportIDs = nil // обнуляем перед заполнением
+
+		for sportRows.Next() {
+			var sportID int64
+			if err := sportRows.Scan(&sportID); err != nil {
+				return nil, err
+			}
+			user.SportIDs = append(user.SportIDs, sportID)
+		}
+
 		users = append(users, user)
 	}
+
 	return users, nil
 }
 
 func (r *UserRepository) GetUserByUsername(username string) (*model.User, error) {
-	row := r.DB.QueryRow(`
-		SELECT id, username, password_hash, alias, description, age, preferredgender, gender, city_id, preferred_gym_time, sport_id
-		FROM users
-		WHERE username = $1
-	`, username)
-
 	var user model.User
-	var gymTimeJSON, sportsJSON string
+	var gymTime []int
 
-	err := row.Scan(
+	err := r.DB.QueryRow(`
+		SELECT id, telegram_id, username, description, age, gender, preferred_gender, city_id, preferred_gym_time, verified
+		FROM users WHERE username = $1
+	`, username).Scan(
 		&user.ID,
+		&user.TelegramID,
 		&user.UserName,
-		&user.PasswordHash,
-		&user.Alias,
 		&user.Description,
 		&user.Age,
-		&user.PreferredGender,
 		&user.Gender,
-		&user.CityId,
-		&gymTimeJSON,
-		&sportsJSON,
+		&user.PreferredGender,
+		&user.CityID,
+		&gymTime,
+		&user.Verified,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	_ = json.Unmarshal([]byte(gymTimeJSON), &user.PreferredGymTime)
-	_ = json.Unmarshal([]byte(sportsJSON), &user.SportId)
+	user.PreferredGymTime = mapper.MapGymTimeToBits(gymTime)
+
+	rows, err := r.DB.Query(`SELECT sport_id FROM user_sport WHERE user_id = $1`, user.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var sportID int64
+		if err := rows.Scan(&sportID); err != nil {
+			return nil, err
+		}
+		user.SportIDs = append(user.SportIDs, sportID)
+	}
 
 	return &user, nil
 }

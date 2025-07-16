@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -11,6 +12,7 @@ import (
 func JWTAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
+		fmt.Println("Authorization header:", authHeader)
 		if authHeader == "" {
 			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
 			return

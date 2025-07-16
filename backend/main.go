@@ -82,7 +82,7 @@ func main() {
 		}
 	}))
 
-	http.HandleFunc("/api/getUsers", userController.GetAllUsersHandler)
+	http.HandleFunc("/api/getUsers", middleware.JWTAuthMiddleware(userController.GetAllUsersHandler))
 
 	http.HandleFunc("/api/cities", cityController.GetCitiesHandler)
 	http.HandleFunc("/api/cities/pagination", cityController.GetPaginatedCitiesHandler)
