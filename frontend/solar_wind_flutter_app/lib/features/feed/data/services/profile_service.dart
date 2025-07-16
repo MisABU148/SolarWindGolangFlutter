@@ -21,14 +21,21 @@ class ProfileService {
   if (telegramId == null || token == null) {
     throw Exception('Missing token or telegram_id in SharedPreferences');
   }
+  print(telegramId);
+  print(token);
+  print(userId);
 
   final response = await dio.get(
-    'https://solar-wind-gymbro.ru/profiles/api/me',
+    'https://solar-wind-gymbro.ru/profiles/api/users/$userId',  
     options: Options(headers: {
-      'Authorization-telegram-id': userId,
+      'Authorization-telegram-id': telegramId,
       'Authorize': token,
     }),
   );
+
+  if (response.data == null) {
+    throw Exception('User not found');
+  }
 
   return User.fromJson(response.data);
 }
