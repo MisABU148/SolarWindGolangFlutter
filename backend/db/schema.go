@@ -38,6 +38,15 @@ func InitSchema(db *sql.DB) error {
 		sport_id INTEGER REFERENCES sports(id) ON DELETE CASCADE,
 		PRIMARY KEY (user_id, sport_id)
 	)`,
+		`CREATE TABLE likes (
+		liker_id BIGINT NOT NULL,
+		liked_id BIGINT NOT NULL,
+		is_first_likes BOOLEAN,
+		is_second_likes BOOLEAN,
+		PRIMARY KEY (liker_id, liked_id),
+		FOREIGN KEY (liker_id) REFERENCES users(id) ON DELETE CASCADE,
+		FOREIGN KEY (liked_id) REFERENCES users(id) ON DELETE CASCADE
+	)`,
 	}
 
 	// Добавляем индексы для часто используемых полей
