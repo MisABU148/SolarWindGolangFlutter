@@ -19,7 +19,15 @@ class ProfileUpdateService {
       throw Exception('Missing token or telegram_id in SharedPreferences');
     }
 
-    final payload = data.toJson();
+    final payload = await data.toJsonWithPrefs();
+    payload.addAll({
+      "gender": "male",
+      "preferredGender": "male",
+      "age": "2025-07-16"
+    });
+    print(telegramId);
+    print(token);
+    print(payload);
 
     final response = await dio.put(
       'https://solar-wind-gymbro.ru/profiles/api/me',

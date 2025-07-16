@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../presentation/state/registration_provider.dart';
 import 'gender_and_birth_screen.dart';
 
+import 'package:solar_wind_flutter_app/l10n/app_localizations.dart';
+
 class FillProfileScreen extends StatefulWidget {
   const FillProfileScreen({super.key});
 
@@ -52,7 +54,12 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tell us about yourself')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.tell),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer, 
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -60,8 +67,8 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
             // 👤 Имя
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Your Name *',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.name,
                 border: OutlineInputBorder(),
               ),
             ),
@@ -69,8 +76,8 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
             // 📄 Описание
             TextField(
               controller: aboutController,
-              decoration: const InputDecoration(
-                labelText: 'About You',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.about,
                 border: OutlineInputBorder(),
               ),
               maxLines: 4,
@@ -82,7 +89,7 @@ class _FillProfileScreenState extends State<FillProfileScreen> {
               height: 52,
               child: ElevatedButton(
                 onPressed: isNameValid ? _goNext : null,
-                child: const Text('Next'),
+                child: Text(AppLocalizations.of(context)!.next),
               ),
             )
           ],

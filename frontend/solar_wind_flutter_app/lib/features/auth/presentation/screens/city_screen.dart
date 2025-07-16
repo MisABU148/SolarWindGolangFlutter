@@ -4,6 +4,7 @@ import '../../data/services/city_service.dart';
 import '../../data/models/city.dart';
 import '../screens/sport_screen.dart';
 import '../../presentation/state/registration_provider.dart';
+import 'package:solar_wind_flutter_app/l10n/app_localizations.dart';
 
 class ChooseCityScreen extends StatefulWidget {
   const ChooseCityScreen({super.key});
@@ -59,7 +60,12 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Choose City')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.city),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer, 
+        elevation: 0,
+      ),
       body: Column(
         children: [
           Padding(
@@ -97,7 +103,7 @@ class _ChooseCityScreenState extends State<ChooseCityScreen> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: _goNext,
-                child: const Text('Далее'),
+                child: Text(AppLocalizations.of(context)!.next),
               ),
             ),
         ],

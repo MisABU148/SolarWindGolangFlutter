@@ -90,80 +90,92 @@ class _UserProfileScreenState extends State<UserProfileScreen> with SingleTicker
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_user!.username),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: ScaleTransition(
-              scale: _likeScaleAnimation,
-              child: IconButton(
-                iconSize: 36,
-                icon: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
-                  child: _liked
-                      ? const Icon(Icons.favorite, color: Colors.red, key: ValueKey('liked'))
-                      : const Icon(Icons.favorite_border, color: Colors.grey, key: ValueKey('unliked')),
-                ),
-                onPressed: _like,
-                tooltip: 'Like',
-              ),
-            ),
+      AppBar(
+  backgroundColor: Theme.of(context).colorScheme.primary, // Основной цвет темы
+  foregroundColor: Theme.of(context).colorScheme.onPrimary, // Цвет текста/иконок
+  title: Text(_user!.username),
+  actions: [
+    Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: ScaleTransition(
+        scale: _likeScaleAnimation,
+        child: IconButton(
+          iconSize: 36,
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) => 
+              ScaleTransition(scale: animation, child: child),
+            child: _liked
+              ? const Icon(Icons.favorite, color: Colors.red, key: ValueKey('liked'))
+              : const Icon(Icons.favorite_border, color: Colors.grey, key: ValueKey('unliked')),
           ),
-        ],
+          onPressed: _like,
+          tooltip: 'Like',
+        ),
       ),
-      body: Column(
-        children: [
-          // Аватарка без пульсации
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: CircleAvatar(
-              radius: 60,
-              backgroundColor: Colors.blueAccent,
-              child: Text(
-                _user!.username.isNotEmpty ? _user!.username[0].toUpperCase() : '?',
-                style: const TextStyle(fontSize: 48, color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
+    ),
+  ],
+),
 
-          // Контент
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _user!.description,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'City: ${_user!.cityName}',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                    ),
-                    const SizedBox(height: 20),
-                    Wrap(
-                      spacing: 8,
-                      children: _user!.sportName
-                          .map((sport) => Chip(
-                                label: Text(
-                                  sport,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ))
-                          .toList(),
-                    ),
-                  ],
+      body: Center(
+  child: Column(
+    children: [
+      const SizedBox(height: 20),
+      CircleAvatar(
+        radius: 60,
+        backgroundColor: Colors.blueAccent,
+        child: Text(
+          _user!.username.isNotEmpty ? _user!.username[0].toUpperCase() : '?',
+          style: const TextStyle(fontSize: 48, color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
+      const SizedBox(height: 20),
+      Expanded(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Center(
+                  child: Text(
+                    _user!.description,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    'City: ${_user!.cityName}',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Center(
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 8,
+                    children: _user!.sportName
+                        .map((sport) => Chip(
+                              label: Text(
+                                sport,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
+    ],
+  ),
+),
+
     );
   }
 }

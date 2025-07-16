@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:solar_wind_flutter_app/features/feed/data/services/profile_service.dart';
-import 'package:solar_wind_flutter_app/features/feed/data/services/profile_update_service.dart';
-import 'package:solar_wind_flutter_app/features/auth/data/models/registration_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/models/city.dart';
+import 'package:solar_wind_flutter_app/features/auth/data/models/registration_data.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/models/sport.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/services/city_service.dart';
 import 'package:solar_wind_flutter_app/features/auth/data/services/sport_service.dart';
+import 'package:solar_wind_flutter_app/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:solar_wind_flutter_app/features/feed/data/services/profile_service.dart';
+import 'package:solar_wind_flutter_app/features/feed/data/services/profile_update_service.dart';
 
 class MyProfileScreen extends StatefulWidget {
   final int userId;
@@ -26,22 +28,20 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   bool _isLoading = true;
   RegistrationData _data = RegistrationData();
 
-  // Поиск и выбор города
+  // Город
+  final _citySearchController = TextEditingController();
   List<City> _citySearchResults = [];
-  final TextEditingController _citySearchController = TextEditingController();
   City? _selectedCity;
 
-  // Поиск и выбор спортов
+  // Спорт
+  final _sportSearchController = TextEditingController();
   List<Sport> _sportSearchResults = [];
-  final TextEditingController _sportSearchController = TextEditingController();
-
   List<Sport> _selectedSports = [];
 
   @override
   void initState() {
     super.initState();
     _loadInitialData();
-
     _citySearchController.addListener(_onCitySearchChanged);
     _sportSearchController.addListener(_onSportSearchChanged);
   }
@@ -53,18 +53,41 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     super.dispose();
   }
 
+Future<void> _logout() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+
+  if (!mounted) return;
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(
+      builder: (_) => WelcomeScreen(),
+    ),
+    (route) => false,
+  );
+}
+
   Future<void> _loadInitialData() async {
     try {
-      final user = await _profileService.fetchUser(widget.userId);
+      final prefs = await SharedPreferences.getInstance();
+      final telegramIdString = prefs.getString('telegram_id');
+      if (telegramIdString == null) {
+        throw Exception('Telegram ID not found in SharedPreferences');
+      }
+      final telegramId = int.tryParse(telegramIdString);
+      if (telegramId == null) {
+        throw Exception('Telegram ID is not a valid number');
+      }
+      final user = await _profileService.fetchUser(telegramId);
       final cities = await _cityService.searchCities('');
       final sports = await _sportService.searchSports('');
 
       final city = cities.firstWhere(
         (c) => c.name == user.cityName,
-        orElse: () => cities.first, // Город всегда есть
+        orElse: () => cities.first,
       );
 
-      final selectedSports = sports.where((sport) => user.sportName.contains(sport.name)).toList();
+      final selectedSports = sports.where((s) => user.sportName.contains(s.name)).toList();
 
       setState(() {
         _data.username = user.username;
@@ -77,13 +100,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
         _citySearchResults = cities;
         _sportSearchResults = sports;
-
-        _isLoading = false;
-
         _citySearchController.text = city.name;
+        _isLoading = false;
       });
     } catch (e) {
-      print("Error loading user: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Failed to load profile")),
       );
@@ -91,7 +111,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     }
   }
 
-  // Поиск города
   Future<void> _onCitySearchChanged() async {
     final query = _citySearchController.text.trim();
     if (query.isEmpty) {
@@ -102,7 +121,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     setState(() => _citySearchResults = results);
   }
 
-  // Поиск спорта
   Future<void> _onSportSearchChanged() async {
     final query = _sportSearchController.text.trim();
     if (query.isEmpty) {
@@ -119,7 +137,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       _data.cityId = city.id;
       _citySearchController.text = city.name;
       _citySearchResults = [];
-      FocusScope.of(context).unfocus(); // Скрыть клавиатуру
+      FocusScope.of(context).unfocus();
     });
   }
 
@@ -169,10 +187,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             fillColor: theme.colorScheme.surface,
             filled: true,
           ),
-          validator: (value) {
-            if (_selectedCity == null) return 'Select a city';
-            return null;
-          },
+          validator: (_) => _selectedCity == null ? 'Select a city' : null,
           style: theme.textTheme.bodyMedium,
         ),
         if (_citySearchResults.isNotEmpty)
@@ -209,16 +224,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           spacing: 8,
           runSpacing: 4,
           children: _selectedSports
-              .map(
-                (sport) => Chip(
-                  label: Text(
-                    sport.name,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
-                  ),
-                  backgroundColor: theme.colorScheme.secondaryContainer,
-                  onDeleted: () => _removeSport(sport),
-                ),
-              )
+              .map((sport) => Chip(
+                    label: Text(
+                      sport.name,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface),
+                    ),
+                    backgroundColor: theme.colorScheme.secondaryContainer,
+                    onDeleted: () => _removeSport(sport),
+                  ))
               .toList(),
         ),
         const SizedBox(height: 8),
@@ -257,31 +270,29 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final theme = Theme.of(context);
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text("My Profile"),
-      backgroundColor: theme.colorScheme.primaryContainer,
-      foregroundColor: theme.colorScheme.onPrimaryContainer,
-      elevation: 0,
-    ),
-    body: _isLoading
-        ? Center(
-            child: CircularProgressIndicator(color: theme.colorScheme.primary),
-          )
-        : Padding(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: ListView(
-                children: [
-                  Text(
-                    "Edit your profile",
-                    style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("My Profile"),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer, 
+        elevation: 0,
+      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator(color: theme.colorScheme.primary))
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    Text(
+                      "Edit your profile",
+                      style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
                     TextFormField(
                       initialValue: _data.username,
                       decoration: InputDecoration(
@@ -316,6 +327,12 @@ Widget build(BuildContext context) {
                     ElevatedButton(
                       onPressed: _saveProfile,
                       child: const Text("Save Changes"),
+                    ),
+                    const SizedBox(height: 24),
+                    TextButton(
+                      onPressed: _logout,
+                      style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
+                      child: const Text("Log out"),
                     ),
                   ],
                 ),
