@@ -84,3 +84,28 @@ func (uc *UserController) GetAllUsersHandler(w http.ResponseWriter, r *http.Requ
 	}
 	json.NewEncoder(w).Encode(users)
 }
+
+func (uc *UserController) CreateDeckHandler(w http.ResponseWriter, r *http.Request) {
+	// Получаем id из query-параметра
+	idStr := r.URL.Query().Get("id")
+	if idStr == "" {
+		http.Error(w, "Missing id parameter", http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid id", http.StatusBadRequest)
+		return
+	}
+
+	// Получаем пользователей из сервиса
+	users, err := uc.Service.CreateDeckForUser(id)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to create deck: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(users)
+}

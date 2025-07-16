@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"backend/constant"
 	"backend/mapper"
 	"backend/model"
 	"database/sql"
@@ -19,8 +20,8 @@ func (r *UserRepository) CreateUser(user model.User) (int64, error) {
 	defer tx.Rollback()
 
 	stmt := `
-		INSERT INTO users (telegram_id, username, description, age, gender, preferred_gender, city_id, preferred_gym_time, verified)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		INSERT INTO users (telegram_id, username, description, age, gender, preferred_gender, city_id, preferred_gym_time)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING id
 	`
 
@@ -34,7 +35,6 @@ func (r *UserRepository) CreateUser(user model.User) (int64, error) {
 		user.PreferredGender,
 		user.CityID,
 		mapper.MapGymTimeFromBits(user.PreferredGymTime),
-		user.Verified,
 	).Scan(&userID)
 	if err != nil {
 		return 0, err
@@ -170,12 +170,12 @@ func (r *UserRepository) GetAllUsers() ([]model.UserDTO, error) {
 			&user.CityID,
 			&gymTime,
 		)
-
 		fmt.Printf("get all users error %s", err)
 		if err != nil {
 			return nil, err
 		}
 		user.PreferredGymTime = mapper.MapGymTimeFromBits(gymTime)
+		fmt.Printf("error of userdto info %d %s \n", user.ID, user.Gender)
 
 		sportRows, err := r.DB.Query(`SELECT sport_id FROM user_sport WHERE user_id = $1`, user.ID)
 		if err != nil {
@@ -204,7 +204,7 @@ func (r *UserRepository) GetUserByUsername(username string) (*model.User, error)
 	var gymTime []int
 
 	err := r.DB.QueryRow(`
-		SELECT id, telegram_id, username, description, age, gender, preferred_gender, city_id, preferred_gym_time, verified
+		SELECT id, telegram_id, username, description, age, gender, preferred_gender, city_id, preferred_gym_time
 		FROM users WHERE username = $1
 	`, username).Scan(
 		&user.ID,
@@ -216,7 +216,6 @@ func (r *UserRepository) GetUserByUsername(username string) (*model.User, error)
 		&user.PreferredGender,
 		&user.CityID,
 		&gymTime,
-		&user.Verified,
 	)
 	if err != nil {
 		return nil, err
@@ -239,4 +238,44 @@ func (r *UserRepository) GetUserByUsername(username string) (*model.User, error)
 	}
 
 	return &user, nil
+}
+
+func (r *UserRepository) CreateDeckAllSettings(
+	initialID int64,
+	gender string,
+	preferred string,
+	cityID int64,
+	age int64,
+) ([]model.User, error) {
+	rows, err := r.DB.Query(constant.CreateDeckQuery, cityID, age, preferred, gender, initialID)
+	fmt.Printf("error of search esers %d %s %s %d %d %d", initialID, gender, preferred, cityID, age, initialID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []model.User
+
+	for rows.Next() {
+		var user model.User
+
+		err := rows.Scan(
+			&user.ID,
+			&user.TelegramID,
+			&user.UserName,
+			&user.Description,
+			&user.Age,
+			&user.Gender,
+			&user.PreferredGender,
+			&user.CityID,
+			&user.PreferredGymTime,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
 }
