@@ -57,7 +57,6 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Левая кнопка "Мой профиль"
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: IconButton(
@@ -116,21 +115,35 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
                           child: Card(
                             elevation: 2,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(user.username, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 8),
-                                  Text(user.description),
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 8,
-                                    children: user.sportName.map((sport) => Chip(label: Text(sport))).toList(),
+                            child: Stack(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(user.username,
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 8),
+                                      Text(user.description),
+                                      const SizedBox(height: 8),
+                                      Wrap(
+                                        spacing: 8,
+                                        children: user.sportName
+                                            .map((sport) => Chip(label: Text(sport)))
+                                            .toList(),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: LikeButton(),
+                                ),
+                              ],
                             ),
                           ),
                         ),
@@ -139,6 +152,67 @@ class _UserFeedScreenState extends State<UserFeedScreen> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class LikeButton extends StatefulWidget {
+  const LikeButton({super.key});
+
+  @override
+  State<LikeButton> createState() => _LikeButtonState();
+}
+
+class _LikeButtonState extends State<LikeButton>
+    with SingleTickerProviderStateMixin {
+  bool isLiked = false;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _scaleAnimation =
+        Tween<double>(begin: 1.0, end: 1.5).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+        );
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _controller.reverse();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTap() {
+    setState(() {
+      isLiked = !isLiked;
+    });
+    _controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: IconButton(
+        iconSize: 32,
+        icon: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+          child: isLiked
+              ? const Icon(Icons.favorite, color: Colors.red, key: ValueKey('liked'))
+              : const Icon(Icons.favorite_border, color: Colors.grey, key: ValueKey('unliked')),
+        ),
+        onPressed: _onTap,
       ),
     );
   }
