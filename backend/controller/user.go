@@ -39,6 +39,7 @@ func (uc *UserController) GetUserHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	user, err := uc.Service.GetByUserID(id)
+	// fmt.Print(id)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("User with ID %d not found", id), http.StatusNotFound)
 		return

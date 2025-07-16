@@ -11,36 +11,41 @@ func InitSchema(db *sql.DB) error {
 		`
 		CREATE TABLE IF NOT EXISTS cities (
 			id SERIAL PRIMARY KEY,
-			name TEXT NOT NULL
+			name TEXT
 		)`,
 		`
 		CREATE TABLE IF NOT EXISTS sports (
 			id SERIAL PRIMARY KEY,
-			name TEXT NOT NULL UNIQUE
+			name TEXT
 		)`,
 		`
 		CREATE TABLE IF NOT EXISTS users (
-			id SERIAL PRIMARY KEY,
-			username TEXT,
-			telegram_id INTEGER UNIQUE,
-			alias TEXT,
-			description TEXT,
-			age INTEGER CHECK (age >= 18 AND age <= 120),
-			preferred_gender TEXT,
-			gender TEXT CHECK (gender IN ('male', 'female', 'other')),
-			city_id INTEGER REFERENCES cities(id),
-			preferred_gym_time TEXT,
-			sport_id INTEGER REFERENCES sports(id),
-			created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-		)`,
+		id SERIAL PRIMARY KEY,
+		telegram_id BIGINT UNIQUE,
+		username TEXT UNIQUE,
+		description TEXT,
+		age INTEGER,
+		gender TEXT CHECK (gender IN ('male', 'female', 'other')),
+		preferred_gender TEXT CHECK (gender IN ('male', 'female', 'other')),
+		city_id INTEGER REFERENCES cities(id),
+		preferred_gym_time INTEGER,
+		created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+	)`,
+		`
+		CREATE TABLE IF NOT EXISTS user_sport (
+		user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+		sport_id INTEGER REFERENCES sports(id) ON DELETE CASCADE,
+		PRIMARY KEY (user_id, sport_id)
+	)`,
 	}
 
 	// Добавляем индексы для часто используемых полей
 	createIndexes := []string{
 		"CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)",
 		"CREATE INDEX IF NOT EXISTS idx_users_city_id ON users(city_id)",
-		"CREATE INDEX IF NOT EXISTS idx_users_sport_id ON users(sport_id)",
+		"CREATE INDEX IF NOT EXISTS idx_user_sport_user_id ON user_sport(user_id)",
+		"CREATE INDEX IF NOT EXISTS idx_user_sport_sport_id ON user_sport(sport_id)",
 	}
 
 	// Выполняем все запросы в транзакции
