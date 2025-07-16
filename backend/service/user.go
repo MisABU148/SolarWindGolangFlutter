@@ -4,6 +4,7 @@ import (
 	"backend/mapper"
 	"backend/model"
 	"backend/repository"
+	"fmt"
 )
 
 type UserService struct {
@@ -33,8 +34,7 @@ func (s *UserService) GetUsers() ([]model.UserDTO, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := make([]model.UserDTO, len(users))
-	return result, nil
+	return users, nil
 }
 
 func (s *UserService) DeleteUserByID(id int64) error {
@@ -47,4 +47,32 @@ func (s *UserService) GetUserByUsername(username string) (model.UserDTO, error) 
 		return model.UserDTO{}, err
 	}
 	return mapper.MapToUserDTO(*user), nil
+}
+
+func (s *UserService) CreateDeckForUser(initialID int64) ([]model.UserDTO, error) {
+	// Получаем параметры пользователя по initialID
+	user, err := s.Repo.GetUserByID(initialID)
+	if err != nil {
+		return nil, fmt.Errorf("user not found: %w", err)
+	}
+
+	// Получаем список пользователей по параметрам
+	users, err := s.Repo.CreateDeckAllSettings(
+		initialID,
+		user.Gender,
+		user.PreferredGender,
+		user.CityID,
+		int64(user.Age), // Если Age в model.User int, а здесь int64 — явно приводим
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create deck: %w", err)
+	}
+
+	// Преобразуем []model.User в []model.UserDTO (если нужно)
+	var userDTOs []model.UserDTO
+	for _, u := range users {
+		userDTOs = append(userDTOs, mapper.MapToUserDTO(u)) // Предполагается, что есть такой маппер
+	}
+
+	return userDTOs, nil
 }
