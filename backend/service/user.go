@@ -11,6 +11,10 @@ type UserService struct {
 	Repo *repository.UserRepository
 }
 
+// type UserService struct {
+// 	Repo repository.UserRepositoryInterface
+// }
+
 func (s *UserService) CreateUser(dto model.UserDTO) (int64, error) {
 	user := mapper.MapToUserEntity(dto)
 	return s.Repo.CreateUser(user)
