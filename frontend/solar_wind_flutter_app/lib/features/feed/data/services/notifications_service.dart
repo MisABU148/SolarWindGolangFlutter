@@ -16,29 +16,43 @@ class LikeNotificationService {
       throw Exception('Missing token or telegram_id in SharedPreferences');
     }
 
-    final response = await dio.get(
-      'https://solar-wind-gymbro.ru/notifications',
-      options: Options(
-        headers: {
-          'Authorization-telegram-id': telegramId,
-          'Authorize': token,
-        },
-      ),
-    );
+    try {
+      final response = await dio.get(
+        'https://solar-wind-gymbro.ru/notifications',
+        options: Options(
+          headers: {
+            'Authorization-telegram-id': telegramId,
+            'Authorize': token,
+          },
+        ),
+      );
 
-    if (response.statusCode == 204 || response.data == null || response.data.toString().trim().isEmpty) {
-      return _fakeUsers(); 
+      print('Raw response data: ${response.data}');
+
+      // Обработка пустого ответа
+      if (response.statusCode == 204 || 
+          response.data == null || 
+          (response.data is List && response.data.isEmpty)) {
+        return _fakeUsers();
+      }
+
+      // Обработка успешного ответа
+      if (response.data is List) {
+        final users = (response.data as List)
+            .where((item) => item is Map) // Фильтруем только Map элементы
+            .map<User>((json) => User.fromJson(json.cast<String, dynamic>()))
+            .toList();
+
+        if (users.isNotEmpty) {
+          return users; // Возвращаем только реальных пользователей
+        }
+      }
+
+      return _fakeUsers();
+    } catch (e) {
+      print('Error fetching liked users: $e');
+      return _fakeUsers();
     }
-
-    if (response.data is List) {
-      final realUsers = (response.data as List)
-          .map((json) => User.fromJson(json))
-          .toList();
-
-      return [...realUsers, ..._fakeUsers()];
-    }
-
-    throw Exception('Unexpected response format: ${response.data}');
   }
 
   List<User> _fakeUsers() {

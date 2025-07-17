@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:solar_wind_flutter_app/features/feed/data/models/user.dart';
 import 'package:solar_wind_flutter_app/features/feed/data/services/notifications_service.dart';
 import 'package:solar_wind_flutter_app/features/feed/presentation/screen/profile_screen.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -37,25 +37,59 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildUserCard(User user) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        title: Text(user.username),
-        subtitle: Text(user.description),
-        trailing: const Icon(Icons.favorite, color: Colors.redAccent),
+  final theme = Theme.of(context);
+
+  return Card(
+    margin: const EdgeInsets.symmetric(vertical: 8),
+    color: theme.colorScheme.surface,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          title: Text(
+            user.username,
+            style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface),
+          ),
+          subtitle: Text(
+            user.description,
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          trailing: Icon(Icons.favorite, color: theme.colorScheme.error),
           onTap: () {
             Navigator.push(
-                context,
-                MaterialPageRoute(
+              context,
+              MaterialPageRoute(
                 builder: (_) => UserProfileScreen(userId: user.id),
-                ),
+              ),
             );
-        },
-      ),
-    );
-  }
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.chat),
+            label: const Text("Chat in Telegram"),
+            onPressed: () {
+              final telegramId = user.id;
+              if (telegramId != null) {
+                final uri = 'tg://user?id=$telegramId';
 
-  @override
+                launchUrl(Uri.parse(uri));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Telegram ID not available")),
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+@override
 Widget build(BuildContext context) {
   final theme = Theme.of(context);
 
@@ -73,38 +107,14 @@ Widget build(BuildContext context) {
             ? Center(
                 child: Text(
                   "No one liked you yet 🥲",
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onBackground),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onBackground),
                 ),
               )
             : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: _likedMeUsers.length,
-                itemBuilder: (_, index) {
-                  final user = _likedMeUsers[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    color: theme.colorScheme.surface,
-                    child: ListTile(
-                      title: Text(
-                        user.username,
-                        style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface),
-                      ),
-                      subtitle: Text(
-                        user.description,
-                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                      ),
-                      trailing: Icon(Icons.favorite, color: theme.colorScheme.error),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => UserProfileScreen(userId: user.id),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
+                itemBuilder: (_, index) => _buildUserCard(_likedMeUsers[index]),
               ),
   );
 }

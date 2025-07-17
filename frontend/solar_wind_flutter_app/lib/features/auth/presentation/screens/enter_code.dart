@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/services/auth_service.dart';
 import 'city_screen.dart';
+import '../../../feed/presentation/screen/user_feed_screen.dart';
 
 class EnterCodeScreen extends StatefulWidget {
   const EnterCodeScreen({super.key});
@@ -26,14 +27,23 @@ class _EnterCodeScreenState extends State<EnterCodeScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('telegram_id', auth.id.toString());
       await prefs.setString('token', auth.token);
-
-      Navigator.pushReplacement(
+      if (auth.isRegistered) {
+        Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => UserFeedScreen(
+          ),
+        ),
+      );
+      } else {
+        Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => ChooseCityScreen(
           ),
         ),
       );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Authorization failed: $e')),

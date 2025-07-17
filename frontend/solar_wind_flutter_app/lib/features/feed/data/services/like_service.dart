@@ -15,19 +15,28 @@ class LikeService {
       throw Exception('Missing token or telegram_id in SharedPreferences');
     }
 
-    print(telegramId);
-    print(token);
-    print(user2);
+    print('Telegram ID: $telegramId');
+    print('Token: $token');
+    print('Receiver ID: $user2');
 
-    await dio.post(
-      'https://solar-wind-gymbro.ru/likes',
-      options: Options(
-        headers: {
-          'receiver': user2,
-          'Authorization-telegram-id': telegramId,
-          'Authorize': token,
+    try {
+      final response = await dio.post(
+        'https://solar-wind-gymbro.ru/likes/',
+        queryParameters: {
+          'receiver': user2.toString(),
         },
-      ),
-    );
+        options: Options(
+          headers: {
+            'Authorization-telegram-id': telegramId,
+            'Authorize': token,
+          },
+        ),
+      );
+
+      print('Like successful: ${response.statusCode}');
+    } catch (e) {
+      print('Error liking user: $e');
+      rethrow;
+    }
   }
 }
