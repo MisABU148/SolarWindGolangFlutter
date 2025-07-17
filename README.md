@@ -120,29 +120,18 @@ CI/CD (GitHub Actions/Vercel) | ✅ Implemented
 <img width="596" height="486" alt="image" src="https://github.com/user-attachments/assets/46de6bb7-e999-49df-84e7-b69f2f56e18d" />
 
 
-([https://drive.google.com/file/d/1582aUNTyGs4boeZuKjFdMgATzkniZMgu/view?usp=sharing](https://drive.google.com/file/d/1582aUNTyGs4boeZuKjFdMgATzkniZMgu/view?usp=sharing))
-
-
 ## 📸 Screenshots
 
 Dark mode
 <img width="590" height="1280" alt="image" src="https://github.com/user-attachments/assets/5dcb83f5-6cc8-40e2-ab5e-282524b897a0" />
-<img width="590" height="1280" alt="image" src="https://github.com/user-attachments/assets/8f68df49-e12e-4b1c-9015-cdb412989214" />
-
-(https://drive.google.com/file/d/1rUrA0LvTAk-p4qhTr9KQ9zXwctN7TPTN/view?usp=sharing)
-(https://drive.google.com/file/d/13zPn_W-6SLXOZwo6mgkHfUXmyQMrz9DY/view?usp=sharing)
+<img width="590" height="1280" alt="image" src="https://github.com/user-attachments/assets/8f68df49-e12e-4b1c-9015-cdb412989214" /
 
 Different languages
 <img width="590" height="1280" alt="image" src="https://github.com/user-attachments/assets/c6597243-1664-4cb9-82de-753b8e7f4993" />
 <img width="590" height="1280" alt="image" src="https://github.com/user-attachments/assets/47d6f749-444b-4342-ae40-f72f13e2b3a6" />
 
-(https://drive.google.com/file/d/1wx7N1y_sst97yux6Q5WILJkv_42EZDRw/view?usp=sharing)
-(https://drive.google.com/file/d/1PsMHlrNdQYnBHbyt3H27Xje_CxXMhimc/view?usp=sharing)
-
 Telegram authentication
 <img width="590" height="1280" alt="image" src="https://github.com/user-attachments/assets/c8b01dd8-5d99-4bc0-916c-de7c3c257356" />
-
-(https://drive.google.com/file/d/105p0MRWr_530TB5UxI8CnBZADy4zD5ae/view?usp=sharing)
 
 Olso we will talk about features iin presentation
 
