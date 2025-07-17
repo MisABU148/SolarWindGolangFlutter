@@ -71,8 +71,8 @@ func (a *AuthController) GetTokenByCode(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"token":   token,
-		"user_id": result.UserID,
-		"is_new":  result.IsNewUser,
+		"token":        token,
+		"id":           result.UserID,
+		"isRegistered": result.Was,
 	})
 }

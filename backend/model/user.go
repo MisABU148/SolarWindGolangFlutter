@@ -7,7 +7,6 @@ type UserDTO struct {
 	Description      string  `json:"description"`
 	Age              int64   `json:"age"`
 	Gender           string  `json:"gender"`
-	Verified         bool    `json:"verified"`
 	PreferredGender  string  `json:"preferredGender"`
 	CityID           int64   `json:"cityId"`
 	PreferredGymTime []int   `json:"preferredGymTime"`
@@ -21,9 +20,21 @@ type User struct {
 	Description      string
 	Age              int64
 	Gender           string
-	Verified         bool
 	PreferredGender  string
 	CityID           int64
 	PreferredGymTime int
 	SportIDs         []int64
+}
+
+type ProfileDTO struct {
+	ID               int64    `json:"id"`
+	TelegramID       int64    `json:"telegramId"`
+	Username         string   `json:"username"`
+	Description      string   `json:"description"`
+	Age              int64    `json:"age"`
+	Gender           string   `json:"gender"`
+	PreferredGender  string   `json:"preferredGender"`
+	CityName         string   `json:"cityName"`
+	PreferredGymTime []int    `json:"preferredGymTime"`
+	SportNames       []string `json:"sportName"`
 }

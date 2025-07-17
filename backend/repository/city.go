@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/model"
 	"database/sql"
+	"fmt"
 )
 
 type CityRepository struct {
@@ -62,4 +63,18 @@ func (r *CityRepository) SearchCities(word string) ([]model.City, error) {
 		cities = append(cities, c)
 	}
 	return cities, nil
+}
+
+func (r *CityRepository) GetCityNameByID(id int64) (string, error) {
+	var name string
+	fmt.Print("start select in cityRepo \n")
+	err := r.DB.QueryRow("SELECT name FROM cities WHERE id = $1", id).Scan(&name)
+	fmt.Print("make select in cityRepo \n")
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", fmt.Errorf("city with id %d not found", id)
+		}
+		return "", fmt.Errorf("failed to get city name: %w", err)
+	}
+	return name, nil
 }

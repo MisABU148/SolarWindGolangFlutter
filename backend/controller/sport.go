@@ -17,6 +17,7 @@ func (sc *SportController) GetSportsHandler(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Failed to fetch sports", http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sports)
 }
 
@@ -34,6 +35,7 @@ func (sc *SportController) GetPaginatedSportsHandler(w http.ResponseWriter, r *h
 		http.Error(w, "Failed to fetch paginated sports", http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sports)
 }
 
@@ -48,5 +50,6 @@ func (sc *SportController) SearchSportsHandler(w http.ResponseWriter, r *http.Re
 		http.Error(w, "Failed to search sports", http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sports)
 }

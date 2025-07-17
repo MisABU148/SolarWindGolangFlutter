@@ -1,4 +1,3 @@
-// controller/city.go
 package controller
 
 import (
@@ -18,6 +17,7 @@ func (cc *CityController) GetCitiesHandler(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to fetch cities", http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cities)
 }
 
@@ -30,24 +30,29 @@ func (cc *CityController) GetPaginatedCitiesHandler(w http.ResponseWriter, r *ht
 	if size < 1 {
 		size = 10
 	}
+
 	cities, err := cc.Service.GetPaginatedCities(page, size)
 	if err != nil {
 		http.Error(w, "Failed to fetch paginated cities", http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cities)
 }
 
-func (cc *CityController) SearchCitiesHandler(w http.ResponseWriter, r *http.Request) {
-	word := r.URL.Query().Get("word")
-	if word == "" {
-		http.Error(w, "Missing search parameter", http.StatusBadRequest)
+func (c *CityController) SearchCitiesHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("word")
+	if query == "" {
+		http.Error(w, "Missing search word", http.StatusBadRequest)
 		return
 	}
-	cities, err := cc.Service.SearchCities(word)
+
+	cities, err := c.Service.SearchCities(query)
 	if err != nil {
-		http.Error(w, "Failed to search cities", http.StatusInternalServerError)
+		http.Error(w, "Error searching cities", http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cities)
 }

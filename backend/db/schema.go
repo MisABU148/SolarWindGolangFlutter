@@ -20,7 +20,7 @@ func InitSchema(db *sql.DB) error {
 		)`,
 		`
 		CREATE TABLE IF NOT EXISTS users (
-		id SERIAL PRIMARY KEY,
+		id BIGINT PRIMARY KEY,
 		telegram_id BIGINT UNIQUE,
 		username TEXT UNIQUE,
 		description TEXT,
@@ -38,18 +38,15 @@ func InitSchema(db *sql.DB) error {
 		sport_id INTEGER REFERENCES sports(id) ON DELETE CASCADE,
 		PRIMARY KEY (user_id, sport_id)
 	)`,
-		`CREATE TABLE likes (
+		`	CREATE TABLE IF NOT EXISTS likes (
 		liker_id BIGINT NOT NULL,
 		liked_id BIGINT NOT NULL,
-		is_first_likes BOOLEAN,
+		is_first_likes BOOLEAN NOT NULL,
 		is_second_likes BOOLEAN,
-		PRIMARY KEY (liker_id, liked_id),
-		FOREIGN KEY (liker_id) REFERENCES users(id) ON DELETE CASCADE,
-		FOREIGN KEY (liked_id) REFERENCES users(id) ON DELETE CASCADE
+		PRIMARY KEY (liker_id, liked_id)
 	)`,
 	}
 
-	// Добавляем индексы для часто используемых полей
 	createIndexes := []string{
 		"CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id)",
 		"CREATE INDEX IF NOT EXISTS idx_users_city_id ON users(city_id)",
@@ -57,7 +54,6 @@ func InitSchema(db *sql.DB) error {
 		"CREATE INDEX IF NOT EXISTS idx_user_sport_sport_id ON user_sport(sport_id)",
 	}
 
-	// Выполняем все запросы в транзакции
 	tx, err := db.Begin()
 	if err != nil {
 		return err
@@ -70,7 +66,6 @@ func InitSchema(db *sql.DB) error {
 		err = tx.Commit()
 	}()
 
-	// Создаем таблицы
 	for _, stmt := range createTables {
 		if _, err = tx.Exec(stmt); err != nil {
 			log.Printf("Error creating table: %v\nQuery: %s", err, stmt)

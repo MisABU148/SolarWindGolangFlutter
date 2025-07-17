@@ -24,7 +24,8 @@ async def command_start_handler(message: Message) -> None:
         params={"code": f"{code}", "userId": message.from_user.id},
         headers={"Authorize": TOKEN},
     )
-    await message.answer(f"Your code is ||`{code}`||. Do not pass it to anybody, and use **only** to authenticate in Solar-Wind app")
+    await message.answer(f"Your code is ||{code}||. Do not pass it to anybody, and use <b>only</b> to authenticate in Solar-Wind app",
+    parse_mode="MarkdownV2")
 
 
 async def main() -> None:

@@ -8,7 +8,6 @@ import (
 	"backend/repository"
 	"backend/service"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,23 +18,16 @@ import (
 )
 
 func main() {
-	fmt.Printf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-	)
+	// 	connStr := fmt.Sprintf(
+	// 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+	// 		os.Getenv("DB_HOST"),
+	// 		os.Getenv("DB_PORT"),
+	// 		os.Getenv("DB_USER"),
+	// 		os.Getenv("DB_PASSWORD"),
+	// 		os.Getenv("DB_NAME"),
+	// 	)
 
-	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-	)
+	connStr := "host=localhost port=5434 user=postgres password=postgres dbname=userdb sslmode=disable"
 
 	dbConn, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -50,7 +42,6 @@ func main() {
 	citiesPath := "./db/json/cities-names.json"
 	sportsPath := "./db/json/sports.json"
 
-	// Проверяем, существуют ли файлы
 	if _, err := os.Stat(citiesPath); os.IsNotExist(err) {
 		log.Println("Файл не найден:", citiesPath)
 	} else if _, err := os.Stat(sportsPath); os.IsNotExist(err) {
@@ -61,20 +52,25 @@ func main() {
 		}
 	}
 
+	cityRepo := &repository.CityRepository{DB: dbConn}
+	sportRepo := &repository.SportRepository{DB: dbConn}
 	userRepo := &repository.UserRepository{DB: dbConn}
-	userService := &service.UserService{Repo: userRepo}
+	likesRepo := &repository.LikesRepository{DB: dbConn}
+	userService := &service.UserService{
+		Repo:      userRepo,
+		CityRepo:  cityRepo,
+		SportRepo: sportRepo,
+		LikesRepo: likesRepo,
+	}
 	userController := &controller.UserController{Service: userService}
 
-	cityRepo := &repository.CityRepository{DB: dbConn}
 	cityService := &service.CityService{Repo: cityRepo}
 	cityController := &controller.CityController{Service: cityService}
 
-	sportRepo := &repository.SportRepository{DB: dbConn}
 	sportService := &service.SportService{Repo: sportRepo}
 	sportController := &controller.SportController{Service: sportService}
 
-	likesRepo := &repository.LikesRepository{DB: dbConn}
-	matchNotifier := &notifier.HttpMatchNotifier{} // твоя реализация интерфейса MatchNotifier
+	matchNotifier := &notifier.HttpMatchNotifier{}
 
 	likesService := &service.LikesService{
 		Repo:     likesRepo,
@@ -123,7 +119,8 @@ func main() {
 	http.HandleFunc("/api/sports/pagination", sportController.GetPaginatedSportsHandler)
 	http.HandleFunc("/api/sports/search", sportController.SearchSportsHandler)
 
-	http.HandleFunc("/api/likes", likesController.HandleLike)
+	http.HandleFunc("/api/likes", middleware.JWTAuthMiddleware(likesController.HandleLike))
+	http.HandleFunc("/notification", middleware.JWTAuthMiddleware(userController.GetMatches))
 
 	log.Println("Server started at :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

@@ -11,8 +11,10 @@ import (
 
 func JWTAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
+		authHeader := r.Header.Get("Authorize")
+		authHeaderId := r.Header.Get("Authorization-telegram-id")
 		fmt.Println("Authorization header:", authHeader)
+		fmt.Println("Authorization-telegram-id header:", authHeaderId)
 		if authHeader == "" {
 			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
 			return

@@ -35,7 +35,7 @@ func (r *UserRepository) getSportsByUserID(userID int64) ([]int, error) {
 	for rows.Next() {
 		var sportID int
 		if err := rows.Scan(&sportID); err != nil {
-			continue // игнорируем ошибку чтения одной строки
+			continue
 		}
 		sports = append(sports, sportID)
 	}
@@ -44,10 +44,11 @@ func (r *UserRepository) getSportsByUserID(userID int64) ([]int, error) {
 }
 
 func (r *UserRepository) CreateTelegramUser(user model.User) (int64, error) {
-	var id int64
-
-	err := r.DB.QueryRow(`
+	fmt.Print("creating user")
+	// используем TelegramID как ID
+	_, err := r.DB.Exec(`
         INSERT INTO users (
+            id,
             username,
             telegram_id,
             description,
@@ -57,22 +58,22 @@ func (r *UserRepository) CreateTelegramUser(user model.User) (int64, error) {
             city_id,
             preferred_gym_time
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `,
+		user.TelegramID,
 		user.UserName,
 		user.TelegramID,
 		user.Description,
 		user.Age,
 		"male",
 		"male",
-		user.CityID,
+		1,
 		user.PreferredGymTime,
-	).Scan(&id)
+	)
 
 	if err != nil {
 		return 0, fmt.Errorf("failed to create telegram user: %w", err)
 	}
 
-	return id, nil
+	return user.TelegramID, nil
 }
